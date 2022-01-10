@@ -4,9 +4,6 @@ version: '3.3'
 services:
   pg-micro:
     image: micro/micro:latest
-    environment:
-      MICRO_REGISTRY: "etcd"
-      MICRO_REGISTRY_ADDRESS: "etcd1:2379,etcd2:2379,etcd3:2379"
     ports:
       - 8080:8080
       - 8082:8082
@@ -82,4 +79,4 @@ volumes:
 
 networks:
   pg-network:
-    driver: overlay
+    external: true
