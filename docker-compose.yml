@@ -2,14 +2,29 @@
 version: '3.3'
 
 services:
-  pg-micro:
-    image: micro/micro:latest
+  pg-micro-api:
+    container_name: pg-micro-api
+    image: micro/micro:v2.9.3
     ports:
       - 8080:8080
-      - 8082:8082
+    environment:
+      MICRO_REGISTRY: "etcd"
+      MICRO_REGISTRY_ADDRESS: "etcd1:2379,etcd2:2379,etcd3:2379"
+    command: api --handler=rpc --namespace=pg --type=service --enable_rpc
     networks:
       - pg-network
-    command: server
+
+  pg-micro-web:
+    container_name: pg-micro-web
+    image: micro/micro:v2.9.3
+    ports:
+      - 8082:8082
+    environment:
+      MICRO_REGISTRY: "etcd"
+      MICRO_REGISTRY_ADDRESS: "etcd1:2379,etcd2:2379,etcd3:2379"
+    command: web
+    networks:
+      - pg-network
 
   etcd1:
     image: bitnami/etcd:latest
@@ -28,7 +43,7 @@ services:
       - 23801:2380
     networks:
       - pg-network
-  
+
   etcd2:
     image: bitnami/etcd:latest
     environment:
@@ -46,7 +61,7 @@ services:
       - 23802:2380
     networks:
       - pg-network
-  
+
   etcd3:
     image: bitnami/etcd:latest
     environment:
@@ -74,8 +89,26 @@ services:
     networks:
       - pg-network
 
+  pg-user-service:
+    depends_on:
+      - etcd1
+      - etcd2
+      - etcd3
+    build: ./user
+    environment:
+      MICRO_SERVER_ADDRESS: ":9091"
+      MICRO_REGISTRY: "etcd"
+      MICRO_REGISTRY_ADDRESS: "etcd1:2379,etcd2:2379,etcd3:2379"
+    ports:
+      - 9092:9091
+    volumes:
+      - ./user:/app
+    networks:
+      - pg-network
+
+# 卷標，需要docker volume inspect 查看
 volumes:
-  test_data: {}
+  data: {}
 
 networks:
   pg-network:

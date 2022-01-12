@@ -19,8 +19,19 @@ func (srv *UserServiceHandler) Get(ctx context.Context, req *pb.UserRequest, rsp
 }
 
 func (srv *UserServiceHandler) GetAll(ctx context.Context, req *pb.UserRequest, rsp *pb.UserResponse) error {
-	rsp.User.Id = 1
-	rsp.User.Name = "test"
+	user := &pb.User{
+		Id:       0,
+		Name:     "",
+		Email:    "",
+		Phone:    "",
+		RealName: "",
+		Avatar:   "",
+		Status:   0,
+		CreateAt: "",
+		UpdateAt: "",
+	}
+	rsp.User = user
+
 	return nil
 }
 

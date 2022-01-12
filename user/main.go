@@ -11,7 +11,7 @@ func main() {
 	// New Service
 	service := micro.NewService(
 		micro.Name("pg.service.user"),
-		micro.Version("latest"),
+		micro.Version("v1"),
 	)
 
 	// Initialise service
