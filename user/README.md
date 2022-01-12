@@ -5,19 +5,51 @@ This is the User service
 Generated with
 
 ```
-micro new user
+micro new --namespace=pg --type=service user
+```
+
+## Getting Started
+
+- [Configuration](#configuration)
+- [Dependencies](#dependencies)
+- [Usage](#usage)
+
+## Configuration
+
+- FQDN: pg.service.user
+- Type: service
+- Alias: user
+
+## Dependencies
+
+Micro services depend on service discovery. The default is multicast DNS, a zeroconf system.
+
+In the event you need a resilient multi-host setup we recommend etcd.
+
+```
+# install etcd
+brew install etcd
+
+# run etcd
+etcd
 ```
 
 ## Usage
 
-Generate the proto code
+A Makefile is included for convenience
+
+Build the binary
 
 ```
-make proto
+make build
 ```
 
 Run the service
-
 ```
-micro run .
+./user-service
+```
+
+Build a docker image
+```
+make docker
 ```

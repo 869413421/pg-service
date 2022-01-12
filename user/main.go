@@ -1,25 +1,28 @@
 package main
 
 import (
-	"github.com/869413421/pg-service/user/handler"
-	pb "github.com/869413421/pg-service/user/proto"
-
-	"github.com/micro/micro/v3/service"
-	"github.com/micro/micro/v3/service/logger"
+	handler "github.com/869413421/pg-service/user/handler"
+	pb "github.com/869413421/pg-service/user/proto/user"
+	"github.com/micro/go-micro/v2"
+	log "github.com/micro/go-micro/v2/logger"
 )
 
 func main() {
-	// Create service
-	srv := service.New(
-		service.Name("pg.service.user"),
-		service.Version("latest"),
+	// New Service
+	service := micro.NewService(
+		micro.Name("pg.service.user"),
+		micro.Version("latest"),
 	)
 
-	// Register handler
-	pb.RegisterUserServiceHandler(srv.Server(), handler.NewUserServiceHandler())
+	// Initialise service
+	service.Init()
+
+	// Register Handler
+	pb.RegisterUserServiceHandler(service.Server(), handler.NewUserServiceHandler())
+
 
 	// Run service
-	if err := srv.Run(); err != nil {
-		logger.Fatal(err)
+	if err := service.Run(); err != nil {
+		log.Fatal(err)
 	}
 }

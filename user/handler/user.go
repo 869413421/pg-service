@@ -2,7 +2,7 @@ package handler
 
 import (
 	"context"
-	pb "github.com/869413421/pg-service/user/proto"
+	pb "github.com/869413421/pg-service/user/proto/user"
 )
 
 type UserServiceHandler struct {
