@@ -43,6 +43,7 @@ func NewUserServiceEndpoints() []*api.Endpoint {
 
 type UserService interface {
 	GetByID(ctx context.Context, in *GetByIDRequest, opts ...client.CallOption) (*GetByIDResponse, error)
+	Create(ctx context.Context, in *CreateRequest, opts ...client.CallOption) (*CreateResponse, error)
 }
 
 type userService struct {
@@ -67,15 +68,27 @@ func (c *userService) GetByID(ctx context.Context, in *GetByIDRequest, opts ...c
 	return out, nil
 }
 
+func (c *userService) Create(ctx context.Context, in *CreateRequest, opts ...client.CallOption) (*CreateResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.create", in)
+	out := new(CreateResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for UserService service
 
 type UserServiceHandler interface {
 	GetByID(context.Context, *GetByIDRequest, *GetByIDResponse) error
+	Create(context.Context, *CreateRequest, *CreateResponse) error
 }
 
 func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
 	type userService interface {
 		GetByID(ctx context.Context, in *GetByIDRequest, out *GetByIDResponse) error
+		Create(ctx context.Context, in *CreateRequest, out *CreateResponse) error
 	}
 	type UserService struct {
 		userService
@@ -90,4 +103,8 @@ type userServiceHandler struct {
 
 func (h *userServiceHandler) GetByID(ctx context.Context, in *GetByIDRequest, out *GetByIDResponse) error {
 	return h.UserServiceHandler.GetByID(ctx, in, out)
+}
+
+func (h *userServiceHandler) Create(ctx context.Context, in *CreateRequest, out *CreateResponse) error {
+	return h.UserServiceHandler.Create(ctx, in, out)
 }

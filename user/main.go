@@ -1,10 +1,9 @@
 package main
 
 import (
-	"github.com/869413421/pg-service/common/bootstrap"
-	"github.com/869413421/pg-service/common/pkg/model"
-	handler "github.com/869413421/pg-service/user/handler"
-	"github.com/869413421/pg-service/user/pkg/model/user"
+	baseModel "github.com/869413421/pg-service/common/pkg/model"
+	"github.com/869413421/pg-service/user/handler"
+	"github.com/869413421/pg-service/user/pkg/model"
 	pb "github.com/869413421/pg-service/user/proto/user"
 	"github.com/micro/go-micro/v2"
 	log "github.com/micro/go-micro/v2/logger"
@@ -12,8 +11,8 @@ import (
 
 func main() {
 	//1.准备数据库连接，并且执行数据库迁移
-	bootstrap.SetupDB()
-	model.DB.AutoMigrate(&user.User{})
+	db := baseModel.GetDB()
+	db.AutoMigrate(&model.User{})
 
 	// New Service
 	service := micro.NewService(
