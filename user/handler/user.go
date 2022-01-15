@@ -2,14 +2,25 @@ package handler
 
 import (
 	"context"
+	"github.com/869413421/pg-service/user/pkg/model/user"
 	pb "github.com/869413421/pg-service/user/proto/user"
 )
 
 type UserServiceHandler struct {
+	repo user.UserRepositoryInterface
 }
 
 func NewUserServiceHandler() *UserServiceHandler {
-	return &UserServiceHandler{}
+	repo := user.NewUserRepository()
+	return &UserServiceHandler{repo: repo}
+}
+
+func (srv *UserServiceHandler) GetByID(ctx context.Context, req *pb.GetByIDRequest, rsp *pb.GetByIDResponse) error {
+	user, _ := srv.repo.GetByID(req.GetId())
+	pbUser := &pb.User{}
+	pbUser.Id = user.ID
+	rsp.User = pbUser
+	return nil
 }
 
 func (srv *UserServiceHandler) Get(ctx context.Context, req *pb.UserRequest, rsp *pb.UserResponse) error {

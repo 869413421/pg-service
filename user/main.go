@@ -1,13 +1,20 @@
 package main
 
 import (
+	"github.com/869413421/pg-service/common/bootstrap"
+	"github.com/869413421/pg-service/common/pkg/model"
 	handler "github.com/869413421/pg-service/user/handler"
+	"github.com/869413421/pg-service/user/pkg/model/user"
 	pb "github.com/869413421/pg-service/user/proto/user"
 	"github.com/micro/go-micro/v2"
 	log "github.com/micro/go-micro/v2/logger"
 )
 
 func main() {
+	//1.准备数据库连接，并且执行数据库迁移
+	bootstrap.SetupDB()
+	model.DB.AutoMigrate(&user.User{})
+
 	// New Service
 	service := micro.NewService(
 		micro.Name("pg.service.user"),
@@ -19,7 +26,6 @@ func main() {
 
 	// Register Handler
 	pb.RegisterUserServiceHandler(service.Server(), handler.NewUserServiceHandler())
-
 
 	// Run service
 	if err := service.Run(); err != nil {

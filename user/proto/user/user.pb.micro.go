@@ -42,11 +42,7 @@ func NewUserServiceEndpoints() []*api.Endpoint {
 // Client API for UserService service
 
 type UserService interface {
-	Get(ctx context.Context, in *UserRequest, opts ...client.CallOption) (*UserResponse, error)
-	GetAll(ctx context.Context, in *UserRequest, opts ...client.CallOption) (*UserResponse, error)
-	Create(ctx context.Context, in *UserRequest, opts ...client.CallOption) (*UserResponse, error)
-	Update(ctx context.Context, in *UserRequest, opts ...client.CallOption) (*UserResponse, error)
-	Delete(ctx context.Context, in *UserRequest, opts ...client.CallOption) (*UserResponse, error)
+	GetByID(ctx context.Context, in *GetByIDRequest, opts ...client.CallOption) (*GetByIDResponse, error)
 }
 
 type userService struct {
@@ -61,49 +57,9 @@ func NewUserService(name string, c client.Client) UserService {
 	}
 }
 
-func (c *userService) Get(ctx context.Context, in *UserRequest, opts ...client.CallOption) (*UserResponse, error) {
-	req := c.c.NewRequest(c.name, "UserService.get", in)
-	out := new(UserResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userService) GetAll(ctx context.Context, in *UserRequest, opts ...client.CallOption) (*UserResponse, error) {
-	req := c.c.NewRequest(c.name, "UserService.getAll", in)
-	out := new(UserResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userService) Create(ctx context.Context, in *UserRequest, opts ...client.CallOption) (*UserResponse, error) {
-	req := c.c.NewRequest(c.name, "UserService.create", in)
-	out := new(UserResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userService) Update(ctx context.Context, in *UserRequest, opts ...client.CallOption) (*UserResponse, error) {
-	req := c.c.NewRequest(c.name, "UserService.update", in)
-	out := new(UserResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userService) Delete(ctx context.Context, in *UserRequest, opts ...client.CallOption) (*UserResponse, error) {
-	req := c.c.NewRequest(c.name, "UserService.delete", in)
-	out := new(UserResponse)
+func (c *userService) GetByID(ctx context.Context, in *GetByIDRequest, opts ...client.CallOption) (*GetByIDResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.GetByID", in)
+	out := new(GetByIDResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -114,20 +70,12 @@ func (c *userService) Delete(ctx context.Context, in *UserRequest, opts ...clien
 // Server API for UserService service
 
 type UserServiceHandler interface {
-	Get(context.Context, *UserRequest, *UserResponse) error
-	GetAll(context.Context, *UserRequest, *UserResponse) error
-	Create(context.Context, *UserRequest, *UserResponse) error
-	Update(context.Context, *UserRequest, *UserResponse) error
-	Delete(context.Context, *UserRequest, *UserResponse) error
+	GetByID(context.Context, *GetByIDRequest, *GetByIDResponse) error
 }
 
 func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
 	type userService interface {
-		Get(ctx context.Context, in *UserRequest, out *UserResponse) error
-		GetAll(ctx context.Context, in *UserRequest, out *UserResponse) error
-		Create(ctx context.Context, in *UserRequest, out *UserResponse) error
-		Update(ctx context.Context, in *UserRequest, out *UserResponse) error
-		Delete(ctx context.Context, in *UserRequest, out *UserResponse) error
+		GetByID(ctx context.Context, in *GetByIDRequest, out *GetByIDResponse) error
 	}
 	type UserService struct {
 		userService
@@ -140,22 +88,6 @@ type userServiceHandler struct {
 	UserServiceHandler
 }
 
-func (h *userServiceHandler) Get(ctx context.Context, in *UserRequest, out *UserResponse) error {
-	return h.UserServiceHandler.Get(ctx, in, out)
-}
-
-func (h *userServiceHandler) GetAll(ctx context.Context, in *UserRequest, out *UserResponse) error {
-	return h.UserServiceHandler.GetAll(ctx, in, out)
-}
-
-func (h *userServiceHandler) Create(ctx context.Context, in *UserRequest, out *UserResponse) error {
-	return h.UserServiceHandler.Create(ctx, in, out)
-}
-
-func (h *userServiceHandler) Update(ctx context.Context, in *UserRequest, out *UserResponse) error {
-	return h.UserServiceHandler.Update(ctx, in, out)
-}
-
-func (h *userServiceHandler) Delete(ctx context.Context, in *UserRequest, out *UserResponse) error {
-	return h.UserServiceHandler.Delete(ctx, in, out)
+func (h *userServiceHandler) GetByID(ctx context.Context, in *GetByIDRequest, out *GetByIDResponse) error {
+	return h.UserServiceHandler.GetByID(ctx, in, out)
 }

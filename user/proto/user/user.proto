@@ -5,23 +5,32 @@ package pg.service.user;
 option go_package = "proto/user";
 
 service UserService {
-	rpc get (UserRequest) returns (UserResponse){}
-	rpc getAll (UserRequest) returns (UserResponse){}
-	rpc create(UserRequest) returns (UserResponse) {}
-	rpc update(UserRequest) returns (UserResponse) {}
-	rpc delete(UserRequest) returns (UserResponse) {}
+  rpc GetByID (GetByIDRequest) returns (GetByIDResponse){}
+  //	rpc getAll (UserRequest) returns (UserResponse){}
+  //	rpc create(UserRequest) returns (UserResponse) {}
+  //	rpc update(UserRequest) returns (UserResponse) {}
+  //	rpc delete(UserRequest) returns (UserResponse) {}
 }
 
 message User{
-	uint32 id = 1;
-	string name = 2;
-	string email = 3;
-	string phone = 4;
-	string real_name = 5;
-	string avatar = 6;
-	uint32 status = 7;
-	string create_at = 8;
-	string update_at = 9;
+  uint64 id = 1;
+  string name = 2;
+  string email = 3;
+  string phone = 4;
+  string real_name = 5;
+  string avatar = 6;
+  uint32 status = 7;
+  string create_at = 8;
+  string update_at = 9;
+}
+
+message GetByIDRequest{
+  uint64 id = 1;
+}
+
+message GetByIDResponse{
+  User user = 1;
+  repeated Error errors = 2;
 }
 
 message UserRequest {
@@ -29,12 +38,12 @@ message UserRequest {
 }
 
 message UserResponse {
-	User user = 1;
-	repeated User users = 2;
-	repeated Error errors = 3;
+  User user = 1;
+  repeated User users = 2;
+  repeated Error errors = 3;
 }
 
 message Error {
-	int32 code = 1;
-	string description = 2;
+  int32 code = 1;
+  string description = 2;
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/869413421/pg-service/common/pkg/types"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"os"
 	"time"
 )
