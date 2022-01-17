@@ -33,21 +33,16 @@ func (srv *UserServiceHandler) GetByID(ctx context.Context, req *pb.GetByIDReque
 	return nil
 }
 
+// Create 创建用户
 func (srv UserServiceHandler) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.CreateResponse) error {
 	//1.验证提交信息
-	user := model.User{
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: req.Password,
-		RealName: req.RealName,
-		Avatar:   req.Avatar,
-		Phone:    req.Phone,
-	}
+	user := model.User{}
+	user.CreateFill(req)
 
 	errs := requests.ValidateUserEdit(user)
 	if len(errs) > 0 {
 		errStr, _ := JsonHandler.Marshal(errs)
-		return errors.Unauthorized("User.Create", string(errStr))
+		return errors.BadRequest("User.Create.Validate.Error", string(errStr))
 	}
 
 	//2.创建用户
@@ -58,5 +53,35 @@ func (srv UserServiceHandler) Create(ctx context.Context, req *pb.CreateRequest,
 
 	//3.返回用户信息
 	rsp.User = user.ToProtobuf()
+	return nil
+}
+
+func (srv UserServiceHandler) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.UpdateResponse) error {
+	//1.获取用户
+	id := req.Id
+	_user, err := srv.repo.GetByID(id)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+	if err == gorm.ErrRecordNotFound {
+		return errors.NotFound("User.Update.GetUserByID.Error", "user not found ,check you request id")
+	}
+
+	//2.验证提交信息
+	_user.UpdateFill(req)
+	errs := requests.ValidateUserEdit(*_user)
+	if len(errs) > 0 {
+		errStr, _ := JsonHandler.Marshal(errs)
+		return errors.BadRequest("User.Update.Validate.Error", string(errStr))
+	}
+
+	//3.更新用户
+	rowsAffected, err := _user.Update()
+	if rowsAffected == 0 || err != nil {
+		return errors.InternalServerError("User.Update.Update.Error", err.Error())
+	}
+
+	//4.返回更新信息
+	rsp.User = _user.ToProtobuf()
 	return nil
 }

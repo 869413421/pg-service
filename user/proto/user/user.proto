@@ -6,9 +6,8 @@ option go_package = "proto/user";
 
 service UserService {
   rpc GetByID (GetByIDRequest) returns (GetByIDResponse){}
-  rpc create (createRequest) returns (createResponse){}
-  //	rpc create(UserRequest) returns (UserResponse) {}
-  //	rpc update(UserRequest) returns (UserResponse) {}
+  rpc Create (CreateRequest) returns (CreateResponse){}
+  rpc Update(UpdateRequest) returns (UpdateResponse) {}
   //	rpc delete(UserRequest) returns (UserResponse) {}
 }
 
@@ -33,7 +32,7 @@ message GetByIDResponse{
   User user = 1;
 }
 
-message createRequest{
+message CreateRequest{
   string password = 1;
   string name = 2;
   string email = 3;
@@ -42,6 +41,19 @@ message createRequest{
   string avatar = 6;
 }
 
-message createResponse{
+message CreateResponse{
+  User user = 1;
+}
+
+message UpdateRequest{
+  uint64 id = 1;
+  string name = 2;
+  string email = 3;
+  string phone = 4;
+  string real_name = 5;
+  string avatar = 6;
+}
+
+message UpdateResponse{
   User user = 1;
 }

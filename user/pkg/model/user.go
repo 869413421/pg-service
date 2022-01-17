@@ -45,6 +45,47 @@ func (model *User) ToProtobuf() *pb.User {
 	return user
 }
 
+// CreateFill 从更新请求中填充信息
+func (model *User) CreateFill(req *pb.CreateRequest) {
+	if req.Name != "" {
+		model.Name = req.Name
+	}
+	if req.Email != "" {
+		model.Email = req.Email
+	}
+	if req.Phone != "" {
+		model.Phone = req.Phone
+	}
+	if req.Avatar != "" {
+		model.Avatar = req.Avatar
+	}
+	if req.RealName != "" {
+		model.RealName = req.RealName
+	}
+	if req.Password != "" {
+		model.Password = req.Password
+	}
+}
+
+// UpdateFill 从更新请求中填充信息
+func (model *User) UpdateFill(req *pb.UpdateRequest) {
+	if req.Name != "" {
+		model.Name = req.Name
+	}
+	if req.Email != "" {
+		model.Email = req.Email
+	}
+	if req.Phone != "" {
+		model.Phone = req.Phone
+	}
+	if req.Avatar != "" {
+		model.Avatar = req.Avatar
+	}
+	if req.RealName != "" {
+		model.RealName = req.RealName
+	}
+}
+
 // Store 创建用户
 func (model *User) Store() (err error) {
 	result := baseModel.GetDB().Create(&model)
@@ -56,11 +97,12 @@ func (model *User) Store() (err error) {
 }
 
 // Update 更新用户
-func (model *User) Update() (err error) {
+func (model *User) Update() (rowsAffected int64, err error) {
 	result := baseModel.GetDB().Save(&model)
 	err = result.Error
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	rowsAffected = result.RowsAffected
+	return
 }

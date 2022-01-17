@@ -44,6 +44,7 @@ func NewUserServiceEndpoints() []*api.Endpoint {
 type UserService interface {
 	GetByID(ctx context.Context, in *GetByIDRequest, opts ...client.CallOption) (*GetByIDResponse, error)
 	Create(ctx context.Context, in *CreateRequest, opts ...client.CallOption) (*CreateResponse, error)
+	Update(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*UpdateResponse, error)
 }
 
 type userService struct {
@@ -69,8 +70,18 @@ func (c *userService) GetByID(ctx context.Context, in *GetByIDRequest, opts ...c
 }
 
 func (c *userService) Create(ctx context.Context, in *CreateRequest, opts ...client.CallOption) (*CreateResponse, error) {
-	req := c.c.NewRequest(c.name, "UserService.create", in)
+	req := c.c.NewRequest(c.name, "UserService.Create", in)
 	out := new(CreateResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) Update(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*UpdateResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.Update", in)
+	out := new(UpdateResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -83,12 +94,14 @@ func (c *userService) Create(ctx context.Context, in *CreateRequest, opts ...cli
 type UserServiceHandler interface {
 	GetByID(context.Context, *GetByIDRequest, *GetByIDResponse) error
 	Create(context.Context, *CreateRequest, *CreateResponse) error
+	Update(context.Context, *UpdateRequest, *UpdateResponse) error
 }
 
 func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
 	type userService interface {
 		GetByID(ctx context.Context, in *GetByIDRequest, out *GetByIDResponse) error
 		Create(ctx context.Context, in *CreateRequest, out *CreateResponse) error
+		Update(ctx context.Context, in *UpdateRequest, out *UpdateResponse) error
 	}
 	type UserService struct {
 		userService
@@ -107,4 +120,8 @@ func (h *userServiceHandler) GetByID(ctx context.Context, in *GetByIDRequest, ou
 
 func (h *userServiceHandler) Create(ctx context.Context, in *CreateRequest, out *CreateResponse) error {
 	return h.UserServiceHandler.Create(ctx, in, out)
+}
+
+func (h *userServiceHandler) Update(ctx context.Context, in *UpdateRequest, out *UpdateResponse) error {
+	return h.UserServiceHandler.Update(ctx, in, out)
 }
