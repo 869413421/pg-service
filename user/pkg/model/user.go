@@ -8,13 +8,13 @@ import (
 // User 用户模型
 type User struct {
 	baseModel.BaseModel
-	Name     string `gorm:"column:name;type:varchar(255);not null;unique"`
-	Email    string `gorm:"column:email;type:varchar(255) not null;unique"`
-	Phone    string `gorm:"column:phone;type:varchar(255) not null;unique"`
-	RealName string `gorm:"column:real_name;type:varchar(255);not null" `
-	Avatar   string `gorm:"column:avatar;type:varchar(255);not null" `
+	Name     string `gorm:"column:name;type:varchar(255);not null;unique" valid:"name"`
+	Email    string `gorm:"column:email;type:varchar(255) not null;unique" valid:"email"`
+	Phone    string `gorm:"column:phone;type:varchar(255) not null;unique" valid:"phone"`
+	RealName string `gorm:"column:real_name;type:varchar(255);not null" valid:"real_name"`
+	Avatar   string `gorm:"column:avatar;type:varchar(255);not null" valid:"avatar"`
 	Status   string `gorm:"column:status;type:tinyint(1);default:0" `
-	Password string `gorm:"column:password;type:varchar(255) not null;"`
+	Password string `gorm:"column:password;type:varchar(255) not null;" valid:"password"`
 }
 
 // ToORM protobuf转换为orm

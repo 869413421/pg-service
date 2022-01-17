@@ -2,8 +2,10 @@ package handler
 
 import (
 	"context"
+	. "github.com/869413421/pg-service/common/pkg/encoder"
 	"github.com/869413421/pg-service/user/pkg/model"
 	"github.com/869413421/pg-service/user/pkg/repo"
+	"github.com/869413421/pg-service/user/pkg/requests"
 	pb "github.com/869413421/pg-service/user/proto/user"
 	"github.com/jinzhu/gorm"
 	"github.com/micro/go-micro/v2/errors"
@@ -32,26 +34,8 @@ func (srv *UserServiceHandler) GetByID(ctx context.Context, req *pb.GetByIDReque
 }
 
 func (srv UserServiceHandler) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.CreateResponse) error {
-	//1.检查邮箱是否重复
-	user, err := srv.repo.GetByEmail(req.Email)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
-	}
-	if user.ID > 0 {
-		return errors.BadRequest("User.Create", "email already exists ")
-	}
-
-	//2.检查电话是否重复
-	user, err = srv.repo.GetByPhone(req.Phone)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
-	}
-	if user.ID > 0 {
-		return errors.BadRequest("User.Create", "phone already exists ")
-	}
-
-	//3.创建用户
-	user = &model.User{
+	//1.验证提交信息
+	user := model.User{
 		Name:     req.Name,
 		Email:    req.Email,
 		Password: req.Password,
@@ -59,12 +43,20 @@ func (srv UserServiceHandler) Create(ctx context.Context, req *pb.CreateRequest,
 		Avatar:   req.Avatar,
 		Phone:    req.Phone,
 	}
-	err = user.Store()
+
+	errs := requests.ValidateUserEdit(user)
+	if len(errs) > 0 {
+		errStr, _ := JsonHandler.Marshal(errs)
+		return errors.Unauthorized("User.Create", string(errStr))
+	}
+
+	//2.创建用户
+	err := user.Store()
 	if err != nil {
 		return err
 	}
 
-	//4.返回用户信息
+	//3.返回用户信息
 	rsp.User = user.ToProtobuf()
 	return nil
 }
