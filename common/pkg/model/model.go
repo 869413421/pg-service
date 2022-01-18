@@ -20,11 +20,11 @@ func (model BaseModel) GetStringID() string {
 }
 
 func (model BaseModel) CreatedAtDate() string {
-	return model.CreatedAt.Format("2006-01-02")
+	return model.CreatedAt.Format("2006-01-02 15:04:05")
 }
 
 func (model BaseModel) UpdatedAtDate() string {
-	return model.UpdatedAt.Format("2006-01-02")
+	return model.UpdatedAt.Format("2006-01-02 15:04:05")
 }
 
 var db *gorm.DB
@@ -70,20 +70,14 @@ func setupDB() {
 	dbConnectionMaxLifeTime, _ := types.StringToInt(os.Getenv("DB_CONNECTIONS_MAX_LIFE_TIME"))
 	sqlDB.SetConnMaxLifetime(time.Duration(dbConnectionMaxLifeTime) * time.Minute)
 	db = conn
-	fmt.Println("setting")
-	fmt.Println(dbMaxConnections)
-	fmt.Println(dbMaxIdeConnections)
-	fmt.Println(dbConnectionMaxLifeTime)
 }
 
 // GetDB 开放给外部获得db连接
 func GetDB() *gorm.DB {
 	if db == nil {
-		fmt.Println("connect setup")
 		setupDB()
-	} else {
-		fmt.Println("not connect")
 	}
+
 	sqlDB := db.DB()
 	if err := sqlDB.Ping(); err != nil {
 		sqlDB.Close()

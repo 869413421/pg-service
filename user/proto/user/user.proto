@@ -5,10 +5,13 @@ package pg.service.user;
 option go_package = "proto/user";
 
 service UserService {
-  rpc GetByID (GetByIDRequest) returns (GetByIDResponse){}
-  rpc Create (CreateRequest) returns (CreateResponse){}
-  rpc Update(UpdateRequest) returns (UpdateResponse) {}
-  //	rpc delete(UserRequest) returns (UserResponse) {}
+  rpc Get (GetRequest) returns (UserResponse){}
+  rpc Create (CreateRequest) returns (UserResponse){}
+  rpc Update(UpdateRequest) returns (UserResponse) {}
+  rpc Delete(DeleteRequest) returns (UserResponse) {}
+  rpc Auth(AuthRequest) returns(TokenResponse){}
+  rpc ValidateToken(TokenRequest) returns(TokenResponse){}
+  rpc Pagination(PaginationRequest) returns(PaginationResponse){}
 }
 
 message User{
@@ -24,12 +27,8 @@ message User{
   string update_at = 10;
 }
 
-message GetByIDRequest{
+message GetRequest{
   uint64 id = 1;
-}
-
-message GetByIDResponse{
-  User user = 1;
 }
 
 message CreateRequest{
@@ -41,10 +40,6 @@ message CreateRequest{
   string avatar = 6;
 }
 
-message CreateResponse{
-  User user = 1;
-}
-
 message UpdateRequest{
   uint64 id = 1;
   string name = 2;
@@ -54,6 +49,33 @@ message UpdateRequest{
   string avatar = 6;
 }
 
-message UpdateResponse{
+message DeleteRequest{
+  uint64 id = 1;
+}
+
+message UserResponse{
   User user = 1;
+}
+
+message AuthRequest{
+  string email = 1;
+  string password = 2;
+}
+
+message TokenRequest{
+  string token = 1;
+}
+message TokenResponse{
+  string token = 1;
+  bool valid = 2;
+}
+
+message PaginationRequest{
+  uint64 page = 1;
+  uint32 perPage = 2;
+}
+
+message PaginationResponse{
+  repeated User users = 1;
+  uint64 total = 2;
 }

@@ -56,9 +56,6 @@ func ValidateUserEdit(data model.User) map[string][]string {
 			"required:密码必填",
 			"between:密码在3到30个字符之间",
 		},
-		"passwordComfirm": []string{
-			"required:确认密码框为必填项",
-		},
 		"avatar": []string{
 			"between:图片路径长度不符合",
 		},

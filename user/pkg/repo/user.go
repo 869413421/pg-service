@@ -2,6 +2,7 @@ package repo
 
 import (
 	modelBase "github.com/869413421/pg-service/common/pkg/model"
+	"github.com/869413421/pg-service/common/pkg/pagination"
 	"github.com/869413421/pg-service/user/pkg/model"
 	"github.com/jinzhu/gorm"
 )
@@ -12,6 +13,7 @@ type UserRepositoryInterface interface {
 	GetByID(id uint64) (*model.User, error)
 	GetByEmail(email string) (*model.User, error)
 	GetByPhone(phone string) (*model.User, error)
+	Pagination(page uint64, perPage uint32) (users []model.User, viewData pagination.ViewData, err error)
 }
 
 // UserRepository 用户仓库
@@ -30,6 +32,22 @@ func (repo UserRepository) GetByID(id uint64) (*model.User, error) {
 	user := &model.User{}
 	err := repo.DB.First(&user, id).Error
 	return user, err
+}
+
+// Pagination 获取分页数据
+func (repo UserRepository) Pagination(page uint64, perPage uint32) (users []model.User, viewData pagination.ViewData, err error) {
+	//1.初始化分页实例
+	DB := modelBase.GetDB()
+	DB = DB.Model(model.User{}).Order("created_at desc")
+	_pager := pagination.New(DB, page, perPage)
+
+	// 2. 获取视图数据
+	viewData = _pager.Paging()
+
+	// 3. 获取数据
+	_pager.Results(&users)
+
+	return users, viewData, nil
 }
 
 // GetByEmail 根据email获取用户

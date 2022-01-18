@@ -42,9 +42,13 @@ func NewUserServiceEndpoints() []*api.Endpoint {
 // Client API for UserService service
 
 type UserService interface {
-	GetByID(ctx context.Context, in *GetByIDRequest, opts ...client.CallOption) (*GetByIDResponse, error)
-	Create(ctx context.Context, in *CreateRequest, opts ...client.CallOption) (*CreateResponse, error)
-	Update(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*UpdateResponse, error)
+	Get(ctx context.Context, in *GetRequest, opts ...client.CallOption) (*UserResponse, error)
+	Create(ctx context.Context, in *CreateRequest, opts ...client.CallOption) (*UserResponse, error)
+	Update(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*UserResponse, error)
+	Delete(ctx context.Context, in *DeleteRequest, opts ...client.CallOption) (*UserResponse, error)
+	Auth(ctx context.Context, in *AuthRequest, opts ...client.CallOption) (*TokenResponse, error)
+	ValidateToken(ctx context.Context, in *TokenRequest, opts ...client.CallOption) (*TokenResponse, error)
+	Pagination(ctx context.Context, in *PaginationRequest, opts ...client.CallOption) (*PaginationResponse, error)
 }
 
 type userService struct {
@@ -59,9 +63,9 @@ func NewUserService(name string, c client.Client) UserService {
 	}
 }
 
-func (c *userService) GetByID(ctx context.Context, in *GetByIDRequest, opts ...client.CallOption) (*GetByIDResponse, error) {
-	req := c.c.NewRequest(c.name, "UserService.GetByID", in)
-	out := new(GetByIDResponse)
+func (c *userService) Get(ctx context.Context, in *GetRequest, opts ...client.CallOption) (*UserResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.Get", in)
+	out := new(UserResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -69,9 +73,9 @@ func (c *userService) GetByID(ctx context.Context, in *GetByIDRequest, opts ...c
 	return out, nil
 }
 
-func (c *userService) Create(ctx context.Context, in *CreateRequest, opts ...client.CallOption) (*CreateResponse, error) {
+func (c *userService) Create(ctx context.Context, in *CreateRequest, opts ...client.CallOption) (*UserResponse, error) {
 	req := c.c.NewRequest(c.name, "UserService.Create", in)
-	out := new(CreateResponse)
+	out := new(UserResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -79,9 +83,49 @@ func (c *userService) Create(ctx context.Context, in *CreateRequest, opts ...cli
 	return out, nil
 }
 
-func (c *userService) Update(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*UpdateResponse, error) {
+func (c *userService) Update(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*UserResponse, error) {
 	req := c.c.NewRequest(c.name, "UserService.Update", in)
-	out := new(UpdateResponse)
+	out := new(UserResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) Delete(ctx context.Context, in *DeleteRequest, opts ...client.CallOption) (*UserResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.Delete", in)
+	out := new(UserResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) Auth(ctx context.Context, in *AuthRequest, opts ...client.CallOption) (*TokenResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.Auth", in)
+	out := new(TokenResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) ValidateToken(ctx context.Context, in *TokenRequest, opts ...client.CallOption) (*TokenResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.ValidateToken", in)
+	out := new(TokenResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) Pagination(ctx context.Context, in *PaginationRequest, opts ...client.CallOption) (*PaginationResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.Pagination", in)
+	out := new(PaginationResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -92,16 +136,24 @@ func (c *userService) Update(ctx context.Context, in *UpdateRequest, opts ...cli
 // Server API for UserService service
 
 type UserServiceHandler interface {
-	GetByID(context.Context, *GetByIDRequest, *GetByIDResponse) error
-	Create(context.Context, *CreateRequest, *CreateResponse) error
-	Update(context.Context, *UpdateRequest, *UpdateResponse) error
+	Get(context.Context, *GetRequest, *UserResponse) error
+	Create(context.Context, *CreateRequest, *UserResponse) error
+	Update(context.Context, *UpdateRequest, *UserResponse) error
+	Delete(context.Context, *DeleteRequest, *UserResponse) error
+	Auth(context.Context, *AuthRequest, *TokenResponse) error
+	ValidateToken(context.Context, *TokenRequest, *TokenResponse) error
+	Pagination(context.Context, *PaginationRequest, *PaginationResponse) error
 }
 
 func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
 	type userService interface {
-		GetByID(ctx context.Context, in *GetByIDRequest, out *GetByIDResponse) error
-		Create(ctx context.Context, in *CreateRequest, out *CreateResponse) error
-		Update(ctx context.Context, in *UpdateRequest, out *UpdateResponse) error
+		Get(ctx context.Context, in *GetRequest, out *UserResponse) error
+		Create(ctx context.Context, in *CreateRequest, out *UserResponse) error
+		Update(ctx context.Context, in *UpdateRequest, out *UserResponse) error
+		Delete(ctx context.Context, in *DeleteRequest, out *UserResponse) error
+		Auth(ctx context.Context, in *AuthRequest, out *TokenResponse) error
+		ValidateToken(ctx context.Context, in *TokenRequest, out *TokenResponse) error
+		Pagination(ctx context.Context, in *PaginationRequest, out *PaginationResponse) error
 	}
 	type UserService struct {
 		userService
@@ -114,14 +166,30 @@ type userServiceHandler struct {
 	UserServiceHandler
 }
 
-func (h *userServiceHandler) GetByID(ctx context.Context, in *GetByIDRequest, out *GetByIDResponse) error {
-	return h.UserServiceHandler.GetByID(ctx, in, out)
+func (h *userServiceHandler) Get(ctx context.Context, in *GetRequest, out *UserResponse) error {
+	return h.UserServiceHandler.Get(ctx, in, out)
 }
 
-func (h *userServiceHandler) Create(ctx context.Context, in *CreateRequest, out *CreateResponse) error {
+func (h *userServiceHandler) Create(ctx context.Context, in *CreateRequest, out *UserResponse) error {
 	return h.UserServiceHandler.Create(ctx, in, out)
 }
 
-func (h *userServiceHandler) Update(ctx context.Context, in *UpdateRequest, out *UpdateResponse) error {
+func (h *userServiceHandler) Update(ctx context.Context, in *UpdateRequest, out *UserResponse) error {
 	return h.UserServiceHandler.Update(ctx, in, out)
+}
+
+func (h *userServiceHandler) Delete(ctx context.Context, in *DeleteRequest, out *UserResponse) error {
+	return h.UserServiceHandler.Delete(ctx, in, out)
+}
+
+func (h *userServiceHandler) Auth(ctx context.Context, in *AuthRequest, out *TokenResponse) error {
+	return h.UserServiceHandler.Auth(ctx, in, out)
+}
+
+func (h *userServiceHandler) ValidateToken(ctx context.Context, in *TokenRequest, out *TokenResponse) error {
+	return h.UserServiceHandler.ValidateToken(ctx, in, out)
+}
+
+func (h *userServiceHandler) Pagination(ctx context.Context, in *PaginationRequest, out *PaginationResponse) error {
+	return h.UserServiceHandler.Pagination(ctx, in, out)
 }

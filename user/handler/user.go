@@ -3,26 +3,32 @@ package handler
 import (
 	"context"
 	. "github.com/869413421/pg-service/common/pkg/encoder"
+	"github.com/869413421/pg-service/common/pkg/types"
 	"github.com/869413421/pg-service/user/pkg/model"
 	"github.com/869413421/pg-service/user/pkg/repo"
 	"github.com/869413421/pg-service/user/pkg/requests"
 	pb "github.com/869413421/pg-service/user/proto/user"
+	"github.com/869413421/pg-service/user/service"
 	"github.com/jinzhu/gorm"
 	"github.com/micro/go-micro/v2/errors"
+	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
 type UserServiceHandler struct {
-	repo repo.UserRepositoryInterface
+	Repo         repo.UserRepositoryInterface
+	TokenService service.Authble
 }
 
 func NewUserServiceHandler() *UserServiceHandler {
 	repo := repo.NewUserRepository()
-	return &UserServiceHandler{repo: repo}
+	tokenService := service.NewTokenService(repo)
+	return &UserServiceHandler{Repo: repo, TokenService: tokenService}
 }
 
-// GetByID 根据ID获取数据
-func (srv *UserServiceHandler) GetByID(ctx context.Context, req *pb.GetByIDRequest, rsp *pb.GetByIDResponse) error {
-	user, err := srv.repo.GetByID(req.GetId())
+// Get 根据ID获取数据
+func (srv *UserServiceHandler) Get(ctx context.Context, req *pb.GetRequest, rsp *pb.UserResponse) error {
+	user, err := srv.Repo.GetByID(req.GetId())
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -34,15 +40,14 @@ func (srv *UserServiceHandler) GetByID(ctx context.Context, req *pb.GetByIDReque
 }
 
 // Create 创建用户
-func (srv UserServiceHandler) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.CreateResponse) error {
+func (srv *UserServiceHandler) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.UserResponse) error {
 	//1.验证提交信息
-	user := model.User{}
-	user.CreateFill(req)
-
-	errs := requests.ValidateUserEdit(user)
+	user := &model.User{}
+	types.Fill(user, req)
+	errs := requests.ValidateUserEdit(*user)
 	if len(errs) > 0 {
 		errStr, _ := JsonHandler.Marshal(errs)
-		return errors.BadRequest("User.Create.Validate.Error", string(errStr))
+		return errors.Forbidden("User.Create.Validate.Error", string(errStr))
 	}
 
 	//2.创建用户
@@ -56,10 +61,11 @@ func (srv UserServiceHandler) Create(ctx context.Context, req *pb.CreateRequest,
 	return nil
 }
 
-func (srv UserServiceHandler) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.UpdateResponse) error {
+// Update 更新用户信息
+func (srv *UserServiceHandler) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.UserResponse) error {
 	//1.获取用户
 	id := req.Id
-	_user, err := srv.repo.GetByID(id)
+	_user, err := srv.Repo.GetByID(id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -68,11 +74,11 @@ func (srv UserServiceHandler) Update(ctx context.Context, req *pb.UpdateRequest,
 	}
 
 	//2.验证提交信息
-	_user.UpdateFill(req)
+	types.Fill(_user, req)
 	errs := requests.ValidateUserEdit(*_user)
 	if len(errs) > 0 {
 		errStr, _ := JsonHandler.Marshal(errs)
-		return errors.BadRequest("User.Update.Validate.Error", string(errStr))
+		return errors.Forbidden("User.Update.Validate.Error", string(errStr))
 	}
 
 	//3.更新用户
@@ -83,5 +89,93 @@ func (srv UserServiceHandler) Update(ctx context.Context, req *pb.UpdateRequest,
 
 	//4.返回更新信息
 	rsp.User = _user.ToProtobuf()
+	return nil
+}
+
+// Delete 删除用户
+func (srv *UserServiceHandler) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.UserResponse) error {
+	//1.获取用户
+	id := req.Id
+	_user, err := srv.Repo.GetByID(id)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+	if err == gorm.ErrRecordNotFound {
+		return errors.NotFound("User.Delete.GetUserByID.Error", "user not found ,check you request id")
+	}
+
+	//2.删除用户
+	rowsAffected, err := _user.Delete()
+	if err != nil {
+		return errors.InternalServerError("User.Delete.Delete.Error", err.Error())
+	}
+	if rowsAffected == 0 {
+		return errors.BadRequest("User.Delete.Delete.Fail", "update fail")
+	}
+
+	//3.返回更新信息
+	rsp.User = _user.ToProtobuf()
+	return nil
+}
+
+// Auth 认证获取token
+func (srv UserServiceHandler) Auth(ctx context.Context, req *pb.AuthRequest, rsp *pb.TokenResponse) error {
+	//1.根据邮件获取用户
+	log.Println("Logging in with:", req.Email, req.Password)
+	user, err := srv.Repo.GetByEmail(req.Email)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+	if err == gorm.ErrRecordNotFound {
+		return errors.NotFound("User.Auth.GetByEmail.Error", "user not found ,check you request id")
+	}
+
+	//2.检验用户密码
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
+	if err != nil {
+		return errors.Unauthorized("User.Auth.CheckPassword.Error", err.Error())
+	}
+
+	//3.生成token
+	token, err := srv.TokenService.Encode(user)
+	if err != nil {
+		return err
+	}
+
+	rsp.Token = token
+	return nil
+}
+
+// ValidateToken 验证token
+func (srv *UserServiceHandler) ValidateToken(ctx context.Context, req *pb.TokenRequest, rsp *pb.TokenResponse) error {
+	claims, err := srv.TokenService.Decode(req.Token)
+	if err != nil {
+		return err
+	}
+
+	if claims.User.ID == 0 {
+		return errors.BadRequest("User.ValidateToken.Error", "user invalid")
+	}
+
+	rsp.Valid = true
+
+	return nil
+}
+
+//Pagination 分页
+func (srv *UserServiceHandler) Pagination(ctx context.Context, req *pb.PaginationRequest, rsp *pb.PaginationResponse) error {
+	users, pagerData, err := srv.Repo.Pagination(req.Page, req.PerPage)
+	if err != nil {
+		return errors.InternalServerError("user.Pagination.Pagination.Error", err.Error())
+	}
+
+	userItems := make([]*pb.User, len(users))
+	for index, user := range users {
+		userItem := user.ToProtobuf()
+		userItems[index] = userItem
+	}
+
+	rsp.Users = userItems
+	rsp.Total = pagerData.TotalCount
 	return nil
 }

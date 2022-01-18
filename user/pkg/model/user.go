@@ -11,9 +11,9 @@ type User struct {
 	Name     string `gorm:"column:name;type:varchar(255);not null;unique" valid:"name"`
 	Email    string `gorm:"column:email;type:varchar(255) not null;unique" valid:"email"`
 	Phone    string `gorm:"column:phone;type:varchar(255) not null;unique" valid:"phone"`
-	RealName string `gorm:"column:real_name;type:varchar(255);not null" valid:"real_name"`
+	RealName string `gorm:"column:real_name;type:varchar(255);not null" valid:"realName"`
 	Avatar   string `gorm:"column:avatar;type:varchar(255);not null" valid:"avatar"`
-	Status   string `gorm:"column:status;type:tinyint(1);default:0" `
+	Status   int    `gorm:"column:status;type:tinyint(1);default:0" `
 	Password string `gorm:"column:password;type:varchar(255) not null;" valid:"password"`
 }
 
@@ -45,47 +45,6 @@ func (model *User) ToProtobuf() *pb.User {
 	return user
 }
 
-// CreateFill 从更新请求中填充信息
-func (model *User) CreateFill(req *pb.CreateRequest) {
-	if req.Name != "" {
-		model.Name = req.Name
-	}
-	if req.Email != "" {
-		model.Email = req.Email
-	}
-	if req.Phone != "" {
-		model.Phone = req.Phone
-	}
-	if req.Avatar != "" {
-		model.Avatar = req.Avatar
-	}
-	if req.RealName != "" {
-		model.RealName = req.RealName
-	}
-	if req.Password != "" {
-		model.Password = req.Password
-	}
-}
-
-// UpdateFill 从更新请求中填充信息
-func (model *User) UpdateFill(req *pb.UpdateRequest) {
-	if req.Name != "" {
-		model.Name = req.Name
-	}
-	if req.Email != "" {
-		model.Email = req.Email
-	}
-	if req.Phone != "" {
-		model.Phone = req.Phone
-	}
-	if req.Avatar != "" {
-		model.Avatar = req.Avatar
-	}
-	if req.RealName != "" {
-		model.RealName = req.RealName
-	}
-}
-
 // Store 创建用户
 func (model *User) Store() (err error) {
 	result := baseModel.GetDB().Create(&model)
@@ -102,6 +61,17 @@ func (model *User) Update() (rowsAffected int64, err error) {
 	err = result.Error
 	if err != nil {
 		return 0, err
+	}
+	rowsAffected = result.RowsAffected
+	return
+}
+
+// Delete 删除用户
+func (model User) Delete() (rowsAffected int64, err error) {
+	result := baseModel.GetDB().Delete(&model)
+	err = result.Error
+	if err != nil {
+		return
 	}
 	rowsAffected = result.RowsAffected
 	return

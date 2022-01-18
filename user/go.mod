@@ -10,9 +10,11 @@ replace github.com/869413421/pg-service/common => ../common
 
 require (
 	github.com/869413421/pg-service/common v0.0.0-20220116122049-a771def830a7
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/protobuf v1.5.2
 	github.com/jinzhu/gorm v1.9.16
 	github.com/micro/go-micro/v2 v2.9.1
 	github.com/thedevsaddam/govalidator v1.9.10
+	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 	google.golang.org/protobuf v1.27.1
 )
