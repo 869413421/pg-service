@@ -25,7 +25,7 @@ type TokenService struct {
 	Repo repo.UserRepositoryInterface
 }
 
-func NewTokenService(repo repo.UserRepositoryInterface) *TokenService {
+func NewTokenService(repo repo.UserRepositoryInterface) Authble {
 	return &TokenService{Repo: repo}
 }
 

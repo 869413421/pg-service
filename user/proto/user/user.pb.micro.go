@@ -49,6 +49,8 @@ type UserService interface {
 	Auth(ctx context.Context, in *AuthRequest, opts ...client.CallOption) (*TokenResponse, error)
 	ValidateToken(ctx context.Context, in *TokenRequest, opts ...client.CallOption) (*TokenResponse, error)
 	Pagination(ctx context.Context, in *PaginationRequest, opts ...client.CallOption) (*PaginationResponse, error)
+	CreatePasswordReset(ctx context.Context, in *CreatePasswordResetRequest, opts ...client.CallOption) (*PasswordResetResponse, error)
+	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...client.CallOption) (*ResetPasswordResponse, error)
 }
 
 type userService struct {
@@ -133,6 +135,26 @@ func (c *userService) Pagination(ctx context.Context, in *PaginationRequest, opt
 	return out, nil
 }
 
+func (c *userService) CreatePasswordReset(ctx context.Context, in *CreatePasswordResetRequest, opts ...client.CallOption) (*PasswordResetResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.CreatePasswordReset", in)
+	out := new(PasswordResetResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...client.CallOption) (*ResetPasswordResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.ResetPassword", in)
+	out := new(ResetPasswordResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for UserService service
 
 type UserServiceHandler interface {
@@ -143,6 +165,8 @@ type UserServiceHandler interface {
 	Auth(context.Context, *AuthRequest, *TokenResponse) error
 	ValidateToken(context.Context, *TokenRequest, *TokenResponse) error
 	Pagination(context.Context, *PaginationRequest, *PaginationResponse) error
+	CreatePasswordReset(context.Context, *CreatePasswordResetRequest, *PasswordResetResponse) error
+	ResetPassword(context.Context, *ResetPasswordRequest, *ResetPasswordResponse) error
 }
 
 func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
@@ -154,6 +178,8 @@ func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts .
 		Auth(ctx context.Context, in *AuthRequest, out *TokenResponse) error
 		ValidateToken(ctx context.Context, in *TokenRequest, out *TokenResponse) error
 		Pagination(ctx context.Context, in *PaginationRequest, out *PaginationResponse) error
+		CreatePasswordReset(ctx context.Context, in *CreatePasswordResetRequest, out *PasswordResetResponse) error
+		ResetPassword(ctx context.Context, in *ResetPasswordRequest, out *ResetPasswordResponse) error
 	}
 	type UserService struct {
 		userService
@@ -192,4 +218,12 @@ func (h *userServiceHandler) ValidateToken(ctx context.Context, in *TokenRequest
 
 func (h *userServiceHandler) Pagination(ctx context.Context, in *PaginationRequest, out *PaginationResponse) error {
 	return h.UserServiceHandler.Pagination(ctx, in, out)
+}
+
+func (h *userServiceHandler) CreatePasswordReset(ctx context.Context, in *CreatePasswordResetRequest, out *PasswordResetResponse) error {
+	return h.UserServiceHandler.CreatePasswordReset(ctx, in, out)
+}
+
+func (h *userServiceHandler) ResetPassword(ctx context.Context, in *ResetPasswordRequest, out *ResetPasswordResponse) error {
+	return h.UserServiceHandler.ResetPassword(ctx, in, out)
 }

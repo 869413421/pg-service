@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	. "github.com/869413421/pg-service/common/pkg/encoder"
+	"github.com/869413421/pg-service/common/pkg/password"
 	"github.com/869413421/pg-service/common/pkg/types"
 	"github.com/869413421/pg-service/user/pkg/model"
 	"github.com/869413421/pg-service/user/pkg/repo"
@@ -13,22 +14,27 @@ import (
 	"github.com/micro/go-micro/v2/errors"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"time"
 )
 
 type UserServiceHandler struct {
-	Repo         repo.UserRepositoryInterface
-	TokenService service.Authble
+	UserRepo        repo.UserRepositoryInterface
+	PasswordRepo    repo.PasswordRestRepositoryInterface
+	TokenService    service.Authble
+	PasswordService service.PasswordResetServiceInterface
 }
 
 func NewUserServiceHandler() *UserServiceHandler {
-	repo := repo.NewUserRepository()
-	tokenService := service.NewTokenService(repo)
-	return &UserServiceHandler{Repo: repo, TokenService: tokenService}
+	userRepo := repo.NewUserRepository()
+	passwordRepo := repo.NewPasswordResetRepository()
+	tokenService := service.NewTokenService(userRepo)
+	passwordService := service.NewPasswordResetService(userRepo, passwordRepo)
+	return &UserServiceHandler{UserRepo: userRepo, PasswordRepo: passwordRepo, TokenService: tokenService, PasswordService: passwordService}
 }
 
 // Get 根据ID获取数据
 func (srv *UserServiceHandler) Get(ctx context.Context, req *pb.GetRequest, rsp *pb.UserResponse) error {
-	user, err := srv.Repo.GetByID(req.GetId())
+	user, err := srv.UserRepo.GetByID(req.GetId())
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -65,7 +71,7 @@ func (srv *UserServiceHandler) Create(ctx context.Context, req *pb.CreateRequest
 func (srv *UserServiceHandler) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.UserResponse) error {
 	//1.获取用户
 	id := req.Id
-	_user, err := srv.Repo.GetByID(id)
+	_user, err := srv.UserRepo.GetByID(id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -96,7 +102,7 @@ func (srv *UserServiceHandler) Update(ctx context.Context, req *pb.UpdateRequest
 func (srv *UserServiceHandler) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.UserResponse) error {
 	//1.获取用户
 	id := req.Id
-	_user, err := srv.Repo.GetByID(id)
+	_user, err := srv.UserRepo.GetByID(id)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -122,7 +128,7 @@ func (srv *UserServiceHandler) Delete(ctx context.Context, req *pb.DeleteRequest
 func (srv UserServiceHandler) Auth(ctx context.Context, req *pb.AuthRequest, rsp *pb.TokenResponse) error {
 	//1.根据邮件获取用户
 	log.Println("Logging in with:", req.Email, req.Password)
-	user, err := srv.Repo.GetByEmail(req.Email)
+	user, err := srv.UserRepo.GetByEmail(req.Email)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -164,7 +170,7 @@ func (srv *UserServiceHandler) ValidateToken(ctx context.Context, req *pb.TokenR
 
 //Pagination 分页
 func (srv *UserServiceHandler) Pagination(ctx context.Context, req *pb.PaginationRequest, rsp *pb.PaginationResponse) error {
-	users, pagerData, err := srv.Repo.Pagination(req.Page, req.PerPage)
+	users, pagerData, err := srv.UserRepo.Pagination(req.Page, req.PerPage)
 	if err != nil {
 		return errors.InternalServerError("user.Pagination.Pagination.Error", err.Error())
 	}
@@ -177,5 +183,45 @@ func (srv *UserServiceHandler) Pagination(ctx context.Context, req *pb.Paginatio
 
 	rsp.Users = userItems
 	rsp.Total = pagerData.TotalCount
+	return nil
+}
+
+//CreatePasswordReset 创建密码重置记录
+func (srv *UserServiceHandler) CreatePasswordReset(ctx context.Context, req *pb.CreatePasswordResetRequest, rsp *pb.PasswordResetResponse) error {
+	//1.获取提交邮箱,检查用户是否存在
+	_, err := srv.UserRepo.GetByEmail(req.Email)
+	if err != nil {
+		return errors.NotFound("User.CreatePasswordReset.GetByEmail.Error", "user not found ,check you email")
+	}
+
+	passwordReset := &model.PasswordReset{}
+	types.Fill(passwordReset, req)
+
+	//2.生成md5保存到数据库
+	passwordReset.Token = password.Md5Str(req.Email + time.Now().String())
+	err = passwordReset.Store()
+	if err != nil {
+		return err
+	}
+
+	//3.返回响应信息
+	pbPasswordReset := &pb.PasswordReset{}
+	types.Fill(pbPasswordReset, passwordReset)
+	rsp.PasswordReset = pbPasswordReset
+
+	return nil
+}
+
+// ResetPassword 重置密码
+func (srv *UserServiceHandler) ResetPassword(ctx context.Context, req *pb.ResetPasswordRequest, rsp *pb.ResetPasswordResponse) error {
+	//1.执行重置逻辑
+	newPassword, err := srv.PasswordService.Reset(req.Token)
+	if err != nil {
+		return err
+	}
+
+	//2.返回新密码
+	rsp.ResetSuccess = true
+	rsp.NewPassword = newPassword
 	return nil
 }

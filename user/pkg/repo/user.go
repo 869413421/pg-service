@@ -22,7 +22,7 @@ type UserRepository struct {
 }
 
 // NewUserRepository 初始化仓库
-func NewUserRepository() *UserRepository {
+func NewUserRepository() UserRepositoryInterface {
 	db := modelBase.GetDB()
 	return &UserRepository{DB: db}
 }

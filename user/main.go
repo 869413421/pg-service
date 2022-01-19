@@ -13,6 +13,7 @@ func main() {
 	//1.准备数据库连接，并且执行数据库迁移
 	db := baseModel.GetDB()
 	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.PasswordReset{})
 
 	// New Service
 	service := micro.NewService(

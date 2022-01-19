@@ -12,6 +12,8 @@ service UserService {
   rpc Auth(AuthRequest) returns(TokenResponse){}
   rpc ValidateToken(TokenRequest) returns(TokenResponse){}
   rpc Pagination(PaginationRequest) returns(PaginationResponse){}
+  rpc CreatePasswordReset(CreatePasswordResetRequest) returns(PasswordResetResponse){}
+  rpc ResetPassword(ResetPasswordRequest) returns(ResetPasswordResponse){}
 }
 
 message User{
@@ -78,4 +80,28 @@ message PaginationRequest{
 message PaginationResponse{
   repeated User users = 1;
   uint64 total = 2;
+}
+
+message PasswordReset{
+  uint64 id = 1;
+  string email = 2;
+  string token = 3;
+  string create_at = 4;
+}
+
+message CreatePasswordResetRequest{
+  string email = 1;
+}
+
+message PasswordResetResponse{
+  PasswordReset passwordReset = 1;
+}
+
+message ResetPasswordRequest{
+  string token = 1 ;
+}
+
+message ResetPasswordResponse{
+  bool resetSuccess = 1;
+  string newPassword = 2;
 }
