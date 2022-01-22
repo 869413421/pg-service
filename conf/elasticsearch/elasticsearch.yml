@@ -1,0 +1,14 @@
+# default configuration in docker
+cluster.name: "elasticsearch" #集群名
+network.host: 0.0.0.0 #主机ip
+#network.bind_host: 0.0.0.0
+#cluster.routing.allocation.disk.threshold_enabled: false
+#node.name: es-master
+#node.master: true
+#node.data: true
+http.cors.enabled: true #允许跨域，集群需要设置
+http.cors.allow-origin: "*" #跨域设置
+#http.port: 9200
+#transport.tcp.port: 9300
+#discovery.zen.minimum_master_nodes: 1
+#discovery.zen.ping.unicast.hosts: *.*.*.*:9300,  *.*.*.*:9301,  *.*.*.*:9302

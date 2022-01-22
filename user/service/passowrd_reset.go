@@ -20,10 +20,11 @@ type PasswordResetService struct {
 	PasswordResetRepo repo.PasswordRestRepositoryInterface
 }
 
-func NewPasswordResetService(userRepo repo.UserRepositoryInterface, passwordResetRepo repo.PasswordRestRepositoryInterface) PasswordResetServiceInterface {
+// NewPasswordResetService 创建业务层
+func NewPasswordResetService() PasswordResetServiceInterface {
 	return &PasswordResetService{
-		UserRepo:          userRepo,
-		PasswordResetRepo: passwordResetRepo,
+		UserRepo:          repo.NewUserRepository(),
+		PasswordResetRepo: repo.NewPasswordResetRepository(),
 	}
 }
 

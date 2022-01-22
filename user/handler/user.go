@@ -27,8 +27,8 @@ type UserServiceHandler struct {
 func NewUserServiceHandler() *UserServiceHandler {
 	userRepo := repo.NewUserRepository()
 	passwordRepo := repo.NewPasswordResetRepository()
-	tokenService := service.NewTokenService(userRepo)
-	passwordService := service.NewPasswordResetService(userRepo, passwordRepo)
+	tokenService := service.NewTokenService()
+	passwordService := service.NewPasswordResetService()
 	return &UserServiceHandler{UserRepo: userRepo, PasswordRepo: passwordRepo, TokenService: tokenService, PasswordService: passwordService}
 }
 
@@ -203,6 +203,11 @@ func (srv *UserServiceHandler) CreatePasswordReset(ctx context.Context, req *pb.
 	if err != nil {
 		return err
 	}
+
+	//err = srv.PasswordService.PushEvent(passwordReset)
+	//if err != nil {
+	//	return err
+	//}
 
 	//3.返回响应信息
 	pbPasswordReset := &pb.PasswordReset{}

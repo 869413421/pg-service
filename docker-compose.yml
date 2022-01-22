@@ -27,7 +27,7 @@ services:
       - pg-network
 
   etcd1:
-    image: bitnami/etcd:latest
+    image: bitnami/etcd:${ETCD_VERSION}
     environment:
       ALLOW_NONE_AUTHENTICATION: "yes"
       ETCD_NAME: "etcd1"
@@ -45,7 +45,7 @@ services:
       - pg-network
 
   etcd2:
-    image: bitnami/etcd:latest
+    image: bitnami/etcd:${ETCD_VERSION}
     environment:
       ALLOW_NONE_AUTHENTICATION: "yes"
       ETCD_NAME: "etcd2"
@@ -63,7 +63,7 @@ services:
       - pg-network
 
   etcd3:
-    image: bitnami/etcd:latest
+    image: bitnami/etcd:${ETCD_VERSION}
     environment:
       ALLOW_NONE_AUTHENTICATION: "yes"
       ETCD_NAME: "etcd3"
@@ -89,17 +89,35 @@ services:
     networks:
       - pg-network
 
+  pg-rabbitmq:
+    image: rabbitmq:${RABBITMQ_VERSION}
+    restart: always
+    ports:
+      - 15672:15672
+      - 5672:5672
+    volumes:
+      - ./data/rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=root
+    networks:
+      - pg-network
+
   pg-user-service:
     depends_on:
       - etcd1
       - etcd2
       - etcd3
       - pg-user-db
+      - pg-rabbitmq
+      - elasticsearch
     build: ./user
     environment:
       MICRO_SERVER_ADDRESS: ":9091"
       MICRO_REGISTRY: "etcd"
       MICRO_REGISTRY_ADDRESS: "etcd1:2379,etcd2:2379,etcd3:2379"
+      MICRO_BROKER: "rabbitmq"
+      MICRO_BROKER_ADDRESS: "amqp://root:root@pg-rabbitmq:5672"
       DB_HOST: "pg-user-db:3306"
       DB_DATABASE: ${USER_DB_DATABASE}
       DB_USER: ${USER_DB_USER}
@@ -115,11 +133,11 @@ services:
       - pg-network
 
   pg-user-db:
-    image: mysql:latest
+    image: mysql:${MYSQL_VERSION}
     ports:
       - ${USER_DB_PORT}:3306
     volumes:
-      - db_user_data:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql
     restart: always
     environment:
       MYSQL_USER: ${USER_DB_USER}
@@ -129,10 +147,71 @@ services:
     networks:
       - pg-network
 
-# 卷標，需要docker volume inspect 查看
-volumes:
-  db_user_data: {}
+  elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:${ES_VERSION}"
+    environment:
+      - discovery.type=single-node #设置为单机
+      - bootstrap.memory_lock=true #锁住内存 提高性能
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" #设置启动内存大小 默认内存/最大内存
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+      - ./conf/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./log/elasticsearch/logs:/usr/share/elasticsearch/logs
+    networks:
+      - pg-network
 
+  logstash:
+    depends_on:
+      - elasticsearch
+    image: "docker.elastic.co/logstash/logstash:${ES_VERSION}"
+    volumes:
+      - ./conf/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./conf/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    command: logstash -f /usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "9600:9600"
+      - "5044:5044"
+    networks:
+      - pg-network
+
+  kibana:
+    depends_on:
+      - elasticsearch
+    image: "docker.elastic.co/kibana/kibana:${ES_VERSION}"
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    volumes:
+      - ./conf/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - "5601:5601"
+    networks:
+      - pg-network
+
+  filebeat:
+    container_name: filebeat
+    image: docker.elastic.co/beats/filebeat:7.5.1 #filebeat:轻量级的日志文件数据收集器，属于Beats六大日志采集器之一
+    depends_on:
+      - elasticsearch
+      - logstash
+      - kibana
+    restart: on-failure
+    user: root # 必须为root，否则会因为无权限而无法启动
+    command: filebeat -e -strict.perms=false
+    volumes:
+      #filebeat.yml配置.log文件的日志输出到logstash #同时配置挂载需要扫描得日志目录，因为扫描的是filebeat容器内的文件路径
+      - ./conf/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./log/filebeat/logs:/usr/share/filebeat/logs:rw
+      - ./data/filebeat/data:/usr/share/filebeat/data:rw
+    networks:
+      - pg-network
+
+# # 卷標，需要docker volume inspect 查看
+# volumes:
+#   db_user_data: {}
+#   rabbitmq_data: {}
 networks:
   pg-network:
     external: true

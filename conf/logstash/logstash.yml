@@ -1,0 +1,4 @@
+## 和kibana的host一样，也需要设置成0.0.0.0才能启动成功
+http.host: "0.0.0.0"
+## 除了可以使用docker-compose.yml中elasticsearch的容器名如 "http://elasticsearch:9200"（前提是同属于一个docker network，且类型为bridge），也可以直接改成公网ip
+xpack.monitoring.elasticsearch.hosts: [ "http://elasticsearch:9200" ]
