@@ -1,4 +1,4 @@
 mysql/*
 elasticsearch/*
-filebeat/*
+filebeat/user-service/*
 rabbitmq/*
