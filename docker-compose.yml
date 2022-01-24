@@ -129,6 +129,7 @@ services:
       - 9092:9091
     volumes:
       - ./user:/app
+      - ./log/user-service/logs:/app/logs
     networks:
       - pg-network
 
@@ -190,8 +191,8 @@ services:
     networks:
       - pg-network
 
-  filebeat:
-    container_name: filebeat
+  user-service-filebeat:
+    container_name: user-service-filebeat
     image: docker.elastic.co/beats/filebeat:7.5.1 #filebeat:轻量级的日志文件数据收集器，属于Beats六大日志采集器之一
     depends_on:
       - elasticsearch
@@ -203,14 +204,23 @@ services:
     volumes:
       #filebeat.yml配置.log文件的日志输出到logstash #同时配置挂载需要扫描得日志目录，因为扫描的是filebeat容器内的文件路径
       - ./conf/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - ./log/filebeat/logs:/usr/share/filebeat/logs:rw
-      - ./data/filebeat/data:/usr/share/filebeat/data:rw
+      - ./log/filebeat/user-service/logs:/usr/share/filebeat/logs:rw
+      - ./data/filebeat/user-service/data:/usr/share/filebeat/data:rw
     networks:
       - pg-network
 
 # # 卷標，需要docker volume inspect 查看
+
+
+
 # volumes:
+
+
+
 #   db_user_data: {}
+
+
+
 #   rabbitmq_data: {}
 networks:
   pg-network:

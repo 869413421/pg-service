@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"github.com/869413421/pg-service/common/pkg/logger"
 	baseModel "github.com/869413421/pg-service/common/pkg/model"
 	"github.com/869413421/pg-service/common/pkg/rabbitmq"
 	"github.com/869413421/pg-service/user/handler"
@@ -8,8 +9,15 @@ import (
 	pb "github.com/869413421/pg-service/user/proto/user"
 	subscriber2 "github.com/869413421/pg-service/user/subscriber"
 	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/util/log"
+	"time"
 )
+
+func testLog() {
+	tick := time.NewTicker(time.Second)
+	for _ = range tick.C {
+		logger.Danger("this is test !!!")
+	}
+}
 
 func Run() {
 	//1.准备数据库连接，并且执行数据库迁移
@@ -27,23 +35,24 @@ func Run() {
 	//3.启动订阅
 	brk, err := rabbitmq.GetBroker()
 	if err != nil {
-		log.Fatal("connection rabbitmq error", err)
+		logger.Danger("connection rabbitmq error:", err)
 	}
 	eventSubscriber := subscriber2.NewEventSubscriber(brk)
 	err = eventSubscriber.Subscriber()
 	if err != nil {
-		log.Fatal(err)
+		logger.Danger("subscriber broker error:", err)
 		return
 	}
 
 	//4.注册服务处理器
 	err = pb.RegisterUserServiceHandler(service.Server(), handler.NewUserServiceHandler())
 	if err != nil {
+		logger.Danger("register user service handler error:", err)
 		return
 	}
 
 	//5.启动服务
 	if err := service.Run(); err != nil {
-		log.Fatal(err)
+		logger.Danger("service run error:", err)
 	}
 }
