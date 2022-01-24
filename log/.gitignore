@@ -1,2 +1,3 @@
 elasticsearch/logs/*
 filebeat/logs/*
+user-service/logs/*
