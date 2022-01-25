@@ -1,5 +1,8 @@
 filebeat.inputs:
   - type: log
+    tags: ['user-service']
+    fields:
+      log_source: user-service
     enabled: true
     paths:
       # 容器中目录下的所有.log文件

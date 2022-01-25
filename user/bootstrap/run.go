@@ -9,15 +9,7 @@ import (
 	pb "github.com/869413421/pg-service/user/proto/user"
 	subscriber2 "github.com/869413421/pg-service/user/subscriber"
 	"github.com/micro/go-micro/v2"
-	"time"
 )
-
-func testLog() {
-	tick := time.NewTicker(time.Second)
-	for _ = range tick.C {
-		logger.Danger("this is test !!!")
-	}
-}
 
 func Run() {
 	//1.准备数据库连接，并且执行数据库迁移
