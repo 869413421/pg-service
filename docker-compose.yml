@@ -125,6 +125,8 @@ services:
       DB_MAX_CONNECTIONS: ${USER_DB_MAX_CONNECTIONS}
       DB_MAX_IDE_CONNECTIONS: ${USER_DB_MAX_IDE_CONNECTIONS}
       DB_CONNECTIONS_MAX_LIFE_TIME: ${USER_DB_CONNECTIONS_MAX_LIFE_TIME}
+      MICRO_TRACE_SERVER: "jaeger:6831"
+      MICRO_TRACE_ENDPOINT: "jaeger:14268/api/traces"
     ports:
       - 9092:9091
     volumes:
@@ -145,6 +147,25 @@ services:
       MYSQL_PASSWORD: ${USER_DB_PASSWORD}
       MYSQL_DATABASE: ${USER_DB_DATABASE}
       MYSQL_ROOT_PASSWORD: ${USER_DB_ROOT_PASSWORD}
+    networks:
+      - pg-network
+  
+  pg-user-service-filebeat:
+    container_name: pg-user-service-filebeat
+    image: docker.elastic.co/beats/filebeat:7.5.1 #filebeat:轻量级的日志文件数据收集器，属于Beats六大日志采集器之一
+    depends_on:
+      - elasticsearch
+      - logstash
+      - kibana
+      - pg-user-service
+    restart: on-failure
+    user: root # 必须为root，否则会因为无权限而无法启动
+    command: filebeat -e -strict.perms=false
+    volumes:
+      #filebeat.yml配置.log文件的日志输出到logstash #同时配置挂载需要扫描得日志目录，因为扫描的是filebeat容器内的文件路径
+      - ./conf/filebeat/user-service/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./log/filebeat/user-service/logs:/usr/share/filebeat/logs:rw
+      - ./data/filebeat/user-service:/usr/share/filebeat/data:rw
     networks:
       - pg-network
 
@@ -190,23 +211,13 @@ services:
       - "5601:5601"
     networks:
       - pg-network
-
-  user-service-filebeat:
-    container_name: pg-user-service-filebeat
-    image: docker.elastic.co/beats/filebeat:7.5.1 #filebeat:轻量级的日志文件数据收集器，属于Beats六大日志采集器之一
-    depends_on:
-      - elasticsearch
-      - logstash
-      - kibana
-      - pg-user-service
-    restart: on-failure
-    user: root # 必须为root，否则会因为无权限而无法启动
-    command: filebeat -e -strict.perms=false
-    volumes:
-      #filebeat.yml配置.log文件的日志输出到logstash #同时配置挂载需要扫描得日志目录，因为扫描的是filebeat容器内的文件路径
-      - ./conf/filebeat/user-service/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - ./log/filebeat/user-service/logs:/usr/share/filebeat/logs:rw
-      - ./data/filebeat/user-service:/usr/share/filebeat/data:rw
+  
+  # 链路追踪
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
     networks:
       - pg-network
 

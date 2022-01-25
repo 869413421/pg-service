@@ -12,6 +12,8 @@ import (
 	"github.com/869413421/pg-service/user/service"
 	"github.com/jinzhu/gorm"
 	"github.com/micro/go-micro/v2/errors"
+	"github.com/micro/go-micro/v2/metadata"
+	"github.com/opentracing/opentracing-go"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"time"
@@ -34,6 +36,23 @@ func NewUserServiceHandler() *UserServiceHandler {
 
 // Get 根据ID获取数据
 func (srv *UserServiceHandler) Get(ctx context.Context, req *pb.GetRequest, rsp *pb.UserResponse) error {
+	md, ok := metadata.FromContext(ctx)
+	if !ok {
+		md = make(map[string]string)
+	}
+	var sp opentracing.Span
+	wireContext, _ := opentracing.GlobalTracer().Extract(opentracing.TextMap, opentracing.TextMapCarrier(md))
+	// 创建新的 Span 并将其绑定到微服务上下文
+	sp = opentracing.StartSpan("Get", opentracing.ChildOf(wireContext))
+	// 记录请求
+	sp.SetTag("req", req)
+	defer func() {
+		// 记录响应
+		sp.SetTag("res", rsp)
+		// 在函数返回 stop span 之前，统计函数执行时间
+		sp.Finish()
+	}()
+
 	user, err := srv.UserRepo.GetByID(req.GetId())
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err

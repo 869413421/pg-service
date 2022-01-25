@@ -5,14 +5,17 @@ import (
 	"strconv"
 )
 
+// Int64ToString INT64转字符串
 func Int64ToString(num int64) string {
 	return strconv.FormatInt(num, 10)
 }
 
+// UInt64ToString UINT64转字符串
 func UInt64ToString(num uint64) string {
 	return strconv.FormatUint(num, 10)
 }
 
+// StringToInt 字符串转INT
 func StringToInt(str string) (int, error) {
 	num, err := strconv.Atoi(str)
 	if err != nil {

@@ -43,10 +43,9 @@ type Pagination struct {
 }
 
 // New 分页对象构建器
-// r —— 用来获取分页的 URL 参数，默认是 page，可通过 config/pagination.go 修改
 // db —— GORM 查询句柄，用以查询数据集和获取数据总数
-// baseURL —— 用以分页链接
-// PerPage —— 每页条数，传参为小于或者等于 0 时为默认值  10，可通过 config/pagination.go 修改
+// page —— page
+// perPage —— 每页条数，传参为小于或者等于 0 时为默认值  10
 func New(db *gorm.DB, page uint64, perPage uint32) *Pagination {
 	// 默认每页数量
 	if perPage <= 0 {
