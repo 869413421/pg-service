@@ -19,6 +19,8 @@ github.com/869413421/pg-service/common v0.0.0-20220125095543-935236a3185e h1:jij
 github.com/869413421/pg-service/common v0.0.0-20220125095543-935236a3185e/go.mod h1:8gUIbnw0fmD1dZ7lsQe53qGW5bHv8fWGg8qpzME8p88=
 github.com/869413421/pg-service/user v0.0.0-20220125095543-935236a3185e h1:sRbEG8ppCHYzf7kqEEaYhsv5EbihS40PjtK9RNJxA/g=
 github.com/869413421/pg-service/user v0.0.0-20220125095543-935236a3185e/go.mod h1:BBCZiMnxsI5A72/srUEsPhHUhLcMb91GqXHgpeGSILA=
+github.com/869413421/pg-service/user v0.0.0-20220127033843-d721ccd1897a h1:BQzmidhtxXM59dHMin2N5FW11j3s9+8PDZnSNhUiMik=
+github.com/869413421/pg-service/user v0.0.0-20220127033843-d721ccd1897a/go.mod h1:BBCZiMnxsI5A72/srUEsPhHUhLcMb91GqXHgpeGSILA=
 github.com/Azure/azure-sdk-for-go v32.4.0+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=
 github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=
 github.com/Azure/go-autorest/autorest v0.1.0/go.mod h1:AKyIcETwSUFxIcs/Wnq/C+kwCtlEYGUVd7FPNb2slmg=
