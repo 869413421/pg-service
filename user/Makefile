@@ -10,7 +10,7 @@ proto:
 
 .PHONY: build
 build: proto
-	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o pg-user-service
+	 CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w' -i -o pg-user-service ./main.go ./plugin.go
 
 .PHONY: test
 test:

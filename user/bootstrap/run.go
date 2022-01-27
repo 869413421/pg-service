@@ -1,9 +1,9 @@
 package bootstrap
 
 import (
+	"github.com/869413421/pg-service/common/pkg/container"
 	"github.com/869413421/pg-service/common/pkg/logger"
 	baseModel "github.com/869413421/pg-service/common/pkg/model"
-	"github.com/869413421/pg-service/common/pkg/rabbitmq"
 	"github.com/869413421/pg-service/common/pkg/trace"
 	"github.com/869413421/pg-service/user/handler"
 	"github.com/869413421/pg-service/user/pkg/model"
@@ -21,25 +21,37 @@ func Run() {
 	db.AutoMigrate(&model.User{})
 	db.AutoMigrate(&model.PasswordReset{})
 
-	//2.创建服务,初始化服务
+	//2.初始化jaeger链路追踪
 	t, io, err := trace.NewTracer("pg.user.service", os.Getenv("MICRO_TRACE_SERVER"))
 	if err != nil {
+		logger.Danger("init jaeger error:", err)
 		return
 	}
 	defer io.Close()
 	opentracing.SetGlobalTracer(t)
+
+	//3.初始化rpc服务
 	service := micro.NewService(
 		micro.Name("pg.service.user"),
 		micro.Version("v1"),
 		micro.WrapHandler(traceplugin.NewHandlerWrapper(opentracing.GlobalTracer())),
 	)
 	service.Init()
+	container.SetService(service)
 
 	//3.启动订阅
-	brk, err := rabbitmq.GetBroker()
+	brk := service.Options().Broker
+	err = brk.Init()
 	if err != nil {
-		logger.Danger("connection rabbitmq error:", err)
+		logger.Danger("connection init error:", err)
+		return
 	}
+	err = brk.Connect()
+	if err != nil {
+		logger.Danger("connection broker error:", err)
+		return
+	}
+	defer brk.Disconnect()
 	eventSubscriber := subscriber2.NewEventSubscriber(brk)
 	err = eventSubscriber.Subscriber()
 	if err != nil {

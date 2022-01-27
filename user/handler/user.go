@@ -4,6 +4,7 @@ import (
 	"context"
 	. "github.com/869413421/pg-service/common/pkg/encoder"
 	"github.com/869413421/pg-service/common/pkg/password"
+	"github.com/869413421/pg-service/common/pkg/trace"
 	"github.com/869413421/pg-service/common/pkg/types"
 	"github.com/869413421/pg-service/user/pkg/model"
 	"github.com/869413421/pg-service/user/pkg/repo"
@@ -12,8 +13,6 @@ import (
 	"github.com/869413421/pg-service/user/service"
 	"github.com/jinzhu/gorm"
 	"github.com/micro/go-micro/v2/errors"
-	"github.com/micro/go-micro/v2/metadata"
-	"github.com/opentracing/opentracing-go"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"time"
@@ -36,22 +35,8 @@ func NewUserServiceHandler() *UserServiceHandler {
 
 // Get 根据ID获取数据
 func (srv *UserServiceHandler) Get(ctx context.Context, req *pb.GetRequest, rsp *pb.UserResponse) error {
-	md, ok := metadata.FromContext(ctx)
-	if !ok {
-		md = make(map[string]string)
-	}
-	var sp opentracing.Span
-	wireContext, _ := opentracing.GlobalTracer().Extract(opentracing.TextMap, opentracing.TextMapCarrier(md))
-	// 创建新的 Span 并将其绑定到微服务上下文
-	sp = opentracing.StartSpan("Get", opentracing.ChildOf(wireContext))
 	// 记录请求
-	sp.SetTag("req", req)
-	defer func() {
-		// 记录响应
-		sp.SetTag("res", rsp)
-		// 在函数返回 stop span 之前，统计函数执行时间
-		sp.Finish()
-	}()
+	defer trace.NewSpan("Get", ctx, req, rsp)
 
 	user, err := srv.UserRepo.GetByID(req.GetId())
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -66,6 +51,9 @@ func (srv *UserServiceHandler) Get(ctx context.Context, req *pb.GetRequest, rsp 
 
 // Create 创建用户
 func (srv *UserServiceHandler) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.UserResponse) error {
+	// 记录请求
+	defer trace.NewSpan("Create", ctx, req, rsp)
+
 	//1.验证提交信息
 	user := &model.User{}
 	types.Fill(user, req)
@@ -88,6 +76,9 @@ func (srv *UserServiceHandler) Create(ctx context.Context, req *pb.CreateRequest
 
 // Update 更新用户信息
 func (srv *UserServiceHandler) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.UserResponse) error {
+	// 记录请求
+	defer trace.NewSpan("Update", ctx, req, rsp)
+
 	//1.获取用户
 	id := req.Id
 	_user, err := srv.UserRepo.GetByID(id)
@@ -119,6 +110,9 @@ func (srv *UserServiceHandler) Update(ctx context.Context, req *pb.UpdateRequest
 
 // Delete 删除用户
 func (srv *UserServiceHandler) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.UserResponse) error {
+	// 记录请求
+	defer trace.NewSpan("Delete", ctx, req, rsp)
+
 	//1.获取用户
 	id := req.Id
 	_user, err := srv.UserRepo.GetByID(id)
@@ -145,6 +139,9 @@ func (srv *UserServiceHandler) Delete(ctx context.Context, req *pb.DeleteRequest
 
 // Auth 认证获取token
 func (srv UserServiceHandler) Auth(ctx context.Context, req *pb.AuthRequest, rsp *pb.TokenResponse) error {
+	// 记录请求
+	defer trace.NewSpan("Auth", ctx, req, rsp)
+
 	//1.根据邮件获取用户
 	log.Println("Logging in with:", req.Email, req.Password)
 	user, err := srv.UserRepo.GetByEmail(req.Email)
@@ -173,6 +170,9 @@ func (srv UserServiceHandler) Auth(ctx context.Context, req *pb.AuthRequest, rsp
 
 // ValidateToken 验证token
 func (srv *UserServiceHandler) ValidateToken(ctx context.Context, req *pb.TokenRequest, rsp *pb.TokenResponse) error {
+	// 记录请求
+	defer trace.NewSpan("ValidateToken", ctx, req, rsp)
+
 	claims, err := srv.TokenService.Decode(req.Token)
 	if err != nil {
 		return err
@@ -189,6 +189,8 @@ func (srv *UserServiceHandler) ValidateToken(ctx context.Context, req *pb.TokenR
 
 //Pagination 分页
 func (srv *UserServiceHandler) Pagination(ctx context.Context, req *pb.PaginationRequest, rsp *pb.PaginationResponse) error {
+	// 记录请求
+	defer trace.NewSpan("Pagination", ctx, req, rsp)
 	users, pagerData, err := srv.UserRepo.Pagination(req.Page, req.PerPage)
 	if err != nil {
 		return errors.InternalServerError("user.Pagination.Pagination.Error", err.Error())
@@ -207,6 +209,9 @@ func (srv *UserServiceHandler) Pagination(ctx context.Context, req *pb.Paginatio
 
 //CreatePasswordReset 创建密码重置记录
 func (srv *UserServiceHandler) CreatePasswordReset(ctx context.Context, req *pb.CreatePasswordResetRequest, rsp *pb.PasswordResetResponse) error {
+	// 记录请求
+	defer trace.NewSpan("CreatePasswordReset", ctx, req, rsp)
+
 	//1.获取提交邮箱,检查用户是否存在
 	_, err := srv.UserRepo.GetByEmail(req.Email)
 	if err != nil {
@@ -238,6 +243,9 @@ func (srv *UserServiceHandler) CreatePasswordReset(ctx context.Context, req *pb.
 
 // ResetPassword 重置密码
 func (srv *UserServiceHandler) ResetPassword(ctx context.Context, req *pb.ResetPasswordRequest, rsp *pb.ResetPasswordResponse) error {
+	// 记录请求
+	defer trace.NewSpan("ResetPassword", ctx, req, rsp)
+
 	//1.执行重置逻辑
 	newPassword, err := srv.PasswordService.Reset(req.Token)
 	if err != nil {

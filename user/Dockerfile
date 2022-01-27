@@ -22,7 +22,7 @@ COPY . .
 RUN  go env -w GOPROXY=https://mirrors.aliyun.com/goproxy,direct && go mod tidy
 
 # 构建二进制文件，添加一些额外参数方便在alpin中运行它
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o pg-user-service
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w' -i -o pg-user-service ./main.go ./plugin.go
 
 # 第二阶段构造
 FROM alpine:latest
