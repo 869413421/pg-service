@@ -13,6 +13,7 @@ import (
 var base = controller.NewBaseController()
 
 func Jwt(content *gin.Context) {
+	logger.Danger("this is test jwt")
 	ctx, ok := ContextWithSpan(content)
 	if ok == false {
 		logger.Warning("user api user/auth get context err")
