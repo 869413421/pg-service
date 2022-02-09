@@ -35,37 +35,6 @@ func main() {
 	// 3.创建用户服务客户端
 	cli := pb.NewUserService("pg.service.user", client.DefaultClient)
 	container.SetUserServiceClient(cli)
-
-	//v1 := g.Group("/user")
-	//v1.Use(gin2micro.TracerWrapper)
-	//{
-	//	v1.GET("/get", func(context *gin.Context) {
-	//		ctx, ok := gin2micro.ContextWithSpan(context)
-	//		if ok == false {
-	//			logger.Warning("user api user/get get context err")
-	//		}
-	//		req := &pb.GetRequest{}
-	//		err := context.BindQuery(req)
-	//		if err != nil {
-	//			context.JSON(200, gin.H{
-	//				"code": "500",
-	//				"msg":  "bad request",
-	//			})
-	//		}
-	//		if resp, err := cli.Get(ctx, req); err != nil {
-	//			context.JSON(200, gin.H{
-	//				"code": "500",
-	//				"msg":  err.Error(),
-	//			})
-	//		} else {
-	//			context.JSON(200, gin.H{
-	//				"code": "200",
-	//				"data": resp,
-	//			})
-	//		}
-	//	})
-	//}
-
 	err = service.Init()
 	if err != nil {
 		logger.Danger("Init api error:", err)

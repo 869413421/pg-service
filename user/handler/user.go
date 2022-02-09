@@ -149,7 +149,7 @@ func (srv UserServiceHandler) Auth(ctx context.Context, req *pb.AuthRequest, rsp
 		return err
 	}
 	if err == gorm.ErrRecordNotFound {
-		return errors.NotFound("User.Auth.GetByEmail.Error", "user not found ,check you request id")
+		return errors.NotFound("User.Auth.GetByEmail.Error", "user not found ,check you password or email")
 	}
 
 	//2.检验用户密码
@@ -227,11 +227,6 @@ func (srv *UserServiceHandler) CreatePasswordReset(ctx context.Context, req *pb.
 	if err != nil {
 		return err
 	}
-
-	//err = srv.PasswordService.PushEvent(passwordReset)
-	//if err != nil {
-	//	return err
-	//}
 
 	//3.返回响应信息
 	pbPasswordReset := &pb.PasswordReset{}
