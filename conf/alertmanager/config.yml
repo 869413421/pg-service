@@ -1,0 +1,30 @@
+# route:
+#   receiver: 'slack'
+
+# receivers:
+#   - name: 'slack'
+#       slack_configs:
+#           - send_resolved: true
+#             username: '<username>'
+#             channel: '#<channel-name>'
+#             api_url: '<incomming-webhook-url>'
+
+
+global:
+  smtp_smarthost: 'smtp.163.com:25' #163服务器
+  smtp_from: '13528685024@163.com' #发邮件的邮箱
+  smtp_auth_username: '13528685024@163.com' #发邮件的邮箱用户名，也就是你的邮箱
+  smtp_auth_password: 'xxxxxxx' #发邮件的邮箱密码
+  smtp_require_tls: false #不进行tls验证
+ 
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 10m
+  receiver: live-monitoring
+ 
+receivers:
+- name: 'live-monitoring'
+  email_configs:
+  - to: '869413421@qq.com' #收邮件的邮箱
