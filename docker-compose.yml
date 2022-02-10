@@ -38,6 +38,8 @@ services:
       ETCD_INITIAL_CLUSTER_TOKEN: "etcd-cluster"
       ETCD_INITIAL_CLUSTER: "etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380"
       ETCD_INITIAL_CLUSTER_STATE: "new"
+    volumes:
+      - ./data/etcd1:/bitnami/etcd
     ports:
       - 23791:2379
       - 23801:2380
@@ -56,6 +58,8 @@ services:
       ETCD_INITIAL_CLUSTER_TOKEN: "etcd-cluster"
       ETCD_INITIAL_CLUSTER: "etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380"
       ETCD_INITIAL_CLUSTER_STATE: "new"
+    volumes:
+      - ./data/etcd2:/bitnami/etcd
     ports:
       - 23792:2379
       - 23802:2380
@@ -74,6 +78,8 @@ services:
       ETCD_INITIAL_CLUSTER_TOKEN: "etcd-cluster"
       ETCD_INITIAL_CLUSTER: "etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380"
       ETCD_INITIAL_CLUSTER_STATE: "new"
+    volumes:
+      - ./data/etcd3:/bitnami/etcd
     ports:
       - 23793:2379
       - 23803:2380
