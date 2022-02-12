@@ -1,0 +1,21 @@
+{
+  "pg-service": {
+    "pg-user-service": {
+      "db": {
+        "address": "pg-user-db:3306",
+        "database": "pg_user",
+        "user": "pg_user",
+        "password": "pg_user",
+        "charset": "utf8",
+        "max_connections": 200,
+        "max_ide_connections": 50,
+        "connection_max_life_time": 5
+      },
+      "rabbit_mq": {
+        "address": "pg-rabbitmq:5672",
+        "user": "root",
+        "password": "root"
+      }
+    }
+  }
+}

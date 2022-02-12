@@ -4,30 +4,18 @@ import (
 	"github.com/869413421/pg-service/common/pkg/container"
 	"github.com/869413421/pg-service/common/pkg/logger"
 	baseModel "github.com/869413421/pg-service/common/pkg/model"
+	pgPrometheus "github.com/869413421/pg-service/common/pkg/prometheus"
 	"github.com/869413421/pg-service/common/pkg/trace"
 	"github.com/869413421/pg-service/user/handler"
 	"github.com/869413421/pg-service/user/pkg/model"
 	pb "github.com/869413421/pg-service/user/proto/user"
-	subscriber2 "github.com/869413421/pg-service/user/subscriber"
+	pgSubscriber "github.com/869413421/pg-service/user/subscriber"
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus/v2"
-	traceplugin "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
+	tracePlugin "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
 	"github.com/opentracing/opentracing-go"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
 	"os"
 )
-
-// 启动 HTTP 服务监听客户端数据采集
-func prometheusBoot() {
-	http.Handle("/metrics", promhttp.Handler())
-	go func() {
-		err := http.ListenAndServe(":9092", nil)
-		if err != nil {
-			logger.Danger("ListenAndServe: ", err)
-		}
-	}()
-}
 
 func Run() {
 	//1.准备数据库连接，并且执行数据库迁移
@@ -48,7 +36,7 @@ func Run() {
 	service := micro.NewService(
 		micro.Name("pg.service.user"),
 		micro.Version("v1"),
-		micro.WrapHandler(traceplugin.NewHandlerWrapper(opentracing.GlobalTracer())),
+		micro.WrapHandler(tracePlugin.NewHandlerWrapper(opentracing.GlobalTracer())),
 		micro.WrapHandler(prometheus.NewHandlerWrapper()),
 	)
 	service.Init()
@@ -67,14 +55,15 @@ func Run() {
 		return
 	}
 	defer brk.Disconnect()
-	eventSubscriber := subscriber2.NewEventSubscriber(brk)
+	eventSubscriber := pgSubscriber.NewEventSubscriber(brk)
 	err = eventSubscriber.Subscriber()
 	if err != nil {
 		logger.Danger("subscriber broker error:", err)
 		return
 	}
 
-	prometheusBoot()
+	//4.启动普罗米修斯
+	pgPrometheus.PrometheusBoot()
 
 	//4.注册服务处理器
 	err = pb.RegisterUserServiceHandler(service.Server(), handler.NewUserServiceHandler())

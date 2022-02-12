@@ -2,10 +2,10 @@ package model
 
 import (
 	"fmt"
+	"github.com/869413421/pg-service/common/pkg/config"
 	"github.com/869413421/pg-service/common/pkg/types"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"os"
 	"time"
 )
 
@@ -28,19 +28,17 @@ func (model BaseModel) UpdatedAtDate() string {
 }
 
 var db *gorm.DB
+var dbConfig *config.Db
 
 func connectDB() *gorm.DB {
 	// 从系统环境变量获取数据库信息
-	host := os.Getenv("DB_HOST")
-	user := os.Getenv("DB_USER")
-	DBName := os.Getenv("DB_DATABASE")
-	password := os.Getenv("DB_PASSWORD")
-
+	serviceConfig := config.LoadConfig()
+	dbConfig = &serviceConfig.Db
 	db, err := gorm.Open(
 		"mysql",
 		fmt.Sprintf(
-			"%s:%s@(%s)/%s?charset=utf8&parseTime=True&loc=Local",
-			user, password, host, DBName,
+			"%s:%s@(%s)/%s?charset=%s&parseTime=True&loc=Local",
+			dbConfig.User, dbConfig.Password, dbConfig.Address, dbConfig.Database, dbConfig.Charset,
 		),
 	)
 
@@ -59,16 +57,13 @@ func setupDB() {
 	sqlDB := conn.DB()
 
 	//2.设置最大连接数
-	dbMaxConnections, _ := types.StringToInt(os.Getenv("DB_MAX_CONNECTIONS"))
-	sqlDB.SetMaxOpenConns(dbMaxConnections)
+	sqlDB.SetMaxOpenConns(dbConfig.MaxConnections)
 
 	//3.设置最大空闲连接数
-	dbMaxIdeConnections, _ := types.StringToInt(os.Getenv("DB_MAX_IDE_CONNECTIONS"))
-	sqlDB.SetMaxIdleConns(dbMaxIdeConnections)
+	sqlDB.SetMaxIdleConns(dbConfig.MaxIdeConnections)
 
 	//4. 设置每个链接的过期时间
-	dbConnectionMaxLifeTime, _ := types.StringToInt(os.Getenv("DB_CONNECTIONS_MAX_LIFE_TIME"))
-	sqlDB.SetConnMaxLifetime(time.Duration(dbConnectionMaxLifeTime) * time.Minute)
+	sqlDB.SetConnMaxLifetime(dbConfig.ConnectionMaxLifeTime * time.Minute)
 	db = conn
 }
 
