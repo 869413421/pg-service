@@ -11,6 +11,7 @@ import (
 	"github.com/micro/go-micro/v2/web"
 	"github.com/opentracing/opentracing-go"
 	"os"
+	"time"
 )
 
 func main() {
@@ -21,6 +22,8 @@ func main() {
 		web.Name(serviceName),
 		web.Address(":8888"),
 		web.Handler(g),
+		web.RegisterTTL(time.Second*30),
+		web.RegisterInterval(time.Second*20),
 	)
 
 	// 2.初始化链路追踪

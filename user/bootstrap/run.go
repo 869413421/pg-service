@@ -15,6 +15,7 @@ import (
 	tracePlugin "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
 	"github.com/opentracing/opentracing-go"
 	"os"
+	"time"
 )
 
 func Run() {
@@ -36,6 +37,8 @@ func Run() {
 	service := micro.NewService(
 		micro.Name("pg.service.user"),
 		micro.Version("v1"),
+		micro.RegisterTTL(time.Second*30),
+		micro.RegisterInterval(time.Second*20),
 		micro.WrapHandler(tracePlugin.NewHandlerWrapper(opentracing.GlobalTracer())),
 		micro.WrapHandler(prometheus.NewHandlerWrapper()),
 	)
