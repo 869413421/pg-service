@@ -9,4 +9,6 @@ require (
 	github.com/869413421/pg-service/user v0.0.0-20220127033843-d721ccd1897a
 	github.com/gin-gonic/gin v1.7.7
 	github.com/micro/go-micro/v2 v2.9.1
+	github.com/micro/go-plugins/wrapper/breaker/hystrix/v2 v2.9.1
+	github.com/opentracing/opentracing-go v1.1.0
 )

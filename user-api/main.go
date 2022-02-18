@@ -7,8 +7,9 @@ import (
 	"github.com/869413421/pg-service/common/pkg/wrapper/opentracing/gin2micro"
 	"github.com/869413421/pg-service/user-api/bootstarp"
 	pb "github.com/869413421/pg-service/user/proto/user"
-	"github.com/micro/go-micro/v2/client"
+	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/web"
+	"github.com/micro/go-plugins/wrapper/breaker/hystrix/v2"
 	"github.com/opentracing/opentracing-go"
 	"os"
 	"time"
@@ -36,7 +37,12 @@ func main() {
 	opentracing.SetGlobalTracer(t)
 
 	// 3.创建用户服务客户端
-	cli := pb.NewUserService("pg.service.user", client.DefaultClient)
+	clientService := micro.NewService(
+		micro.Name("pg.api.user.cli"),
+		micro.WrapClient(hystrix.NewClientWrapper()),
+	)
+	// 3.创建用户服务客户端
+	cli := pb.NewUserService("pg.service.user", clientService.Client())
 	container.SetUserServiceClient(cli)
 	err = service.Init()
 	if err != nil {
