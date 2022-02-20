@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/869413421/pg-service/common/pkg/container"
+	"github.com/869413421/pg-service/common/pkg/hystrixgo"
 	"github.com/869413421/pg-service/common/pkg/logger"
 	"github.com/869413421/pg-service/common/pkg/trace"
 	"github.com/869413421/pg-service/common/pkg/wrapper/opentracing/gin2micro"
@@ -36,12 +37,16 @@ func main() {
 	defer io.Close()
 	opentracing.SetGlobalTracer(t)
 
-	// 3.创建用户服务客户端
+	// 3.Hystrix 短路器收集数据
+	hystrixgo.StartHystrixClient()
+
+	// 4.创建用户服务客户端
 	clientService := micro.NewService(
 		micro.Name("pg.api.user.cli"),
 		micro.WrapClient(hystrix.NewClientWrapper()),
 	)
-	// 3.创建用户服务客户端
+
+	// 5.创建用户服务客户端
 	cli := pb.NewUserService("pg.service.user", clientService.Client())
 	container.SetUserServiceClient(cli)
 	err = service.Init()
