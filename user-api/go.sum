@@ -12,6 +12,9 @@ cloud.google.com/go/pubsub v1.0.1/go.mod h1:R0Gpsv3s54REJCy4fxDixWD93lHJMoZTyQ2k
 cloud.google.com/go/storage v1.0.0/go.mod h1:IhtSnM/ZTZV8YYJWCY8RULGVqBDmpoyjwiyrjsg+URw=
 contrib.go.opencensus.io/exporter/ocagent v0.4.12/go.mod h1:450APlNTSR6FrvC3CTRqYosuDstRB9un7SOx2k/9ckA=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
+github.com/869413421/pg-service/common v0.0.0-20220122101130-3dce972d21c7/go.mod h1:eyzAhgvZ4CwX1+dKxQFKaeZ5CL88f7sLpAwikiHvdeE=
+github.com/869413421/pg-service/common v0.0.0-20220220120747-0f1d4860d8fd h1:MiNZvGXn7JO8X02pUzHY6YcXbq2CEvX2jiQlHYIq02s=
+github.com/869413421/pg-service/common v0.0.0-20220220120747-0f1d4860d8fd/go.mod h1:7gGm85ymrFjjL+naX6T5vUnX2RAkw9PKL/0Rs4WKFKQ=
 github.com/869413421/pg-service/user v0.0.0-20220127033843-d721ccd1897a h1:BQzmidhtxXM59dHMin2N5FW11j3s9+8PDZnSNhUiMik=
 github.com/869413421/pg-service/user v0.0.0-20220127033843-d721ccd1897a/go.mod h1:BBCZiMnxsI5A72/srUEsPhHUhLcMb91GqXHgpeGSILA=
 github.com/Azure/azure-sdk-for-go v32.4.0+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=

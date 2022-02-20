@@ -1,7 +1,7 @@
 package hystrixgo
 
 import (
-    "github.com/afex/hystrix-go/hystrix"
+	"github.com/afex/hystrix-go/hystrix"
 	"net"
 	"net/http"
 )
@@ -9,5 +9,7 @@ import (
 func StartHystrixClient() {
 	hystrixStreamHandler := hystrix.NewStreamHandler()
 	hystrixStreamHandler.Start()
-	go http.ListenAndServe(net.JoinHostPort("", "8181"), hystrixStreamHandler)
+	go func() {
+		http.ListenAndServe(net.JoinHostPort("", "2020"), hystrixStreamHandler)
+	}()
 }
