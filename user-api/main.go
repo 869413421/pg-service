@@ -2,15 +2,14 @@ package main
 
 import (
 	"github.com/869413421/pg-service/common/pkg/container"
-	"github.com/869413421/pg-service/common/pkg/hystrixgo"
 	"github.com/869413421/pg-service/common/pkg/logger"
 	"github.com/869413421/pg-service/common/pkg/trace"
+	"github.com/869413421/pg-service/common/pkg/wrapper/breaker/hystrix"
 	"github.com/869413421/pg-service/common/pkg/wrapper/opentracing/gin2micro"
 	"github.com/869413421/pg-service/user-api/bootstarp"
 	pb "github.com/869413421/pg-service/user/proto/user"
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/web"
-	"github.com/micro/go-plugins/wrapper/breaker/hystrix/v2"
 	"github.com/opentracing/opentracing-go"
 	"os"
 	"time"
@@ -37,16 +36,15 @@ func main() {
 	defer io.Close()
 	opentracing.SetGlobalTracer(t)
 
-	// 3.Hystrix 短路器收集数据
-	hystrixgo.HystrixBoot()
 
-	// 4.创建用户服务客户端
+	// 3.创建用户服务客户端
+	hystrix.Configure([]string{"pg.service.user.UserService.Auth"})
 	clientService := micro.NewService(
 		micro.Name("pg.api.user.cli"),
 		micro.WrapClient(hystrix.NewClientWrapper()),
 	)
 
-	// 5.创建用户服务客户端
+	// 4.创建用户服务客户端
 	cli := pb.NewUserService("pg.service.user", clientService.Client())
 	container.SetUserServiceClient(cli)
 	err = service.Init()
