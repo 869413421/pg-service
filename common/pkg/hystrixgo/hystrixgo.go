@@ -6,10 +6,8 @@ import (
 	"net/http"
 )
 
-func StartHystrixClient() {
+func HystrixBoot() {
 	hystrixStreamHandler := hystrix.NewStreamHandler()
 	hystrixStreamHandler.Start()
-	go func() {
-		http.ListenAndServe(net.JoinHostPort("", "2020"), hystrixStreamHandler)
-	}()
+	go http.ListenAndServe(net.JoinHostPort("", "81"), hystrixStreamHandler)
 }

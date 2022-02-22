@@ -38,7 +38,7 @@ func main() {
 	opentracing.SetGlobalTracer(t)
 
 	// 3.Hystrix 短路器收集数据
-	hystrixgo.StartHystrixClient()
+	hystrixgo.HystrixBoot()
 
 	// 4.创建用户服务客户端
 	clientService := micro.NewService(
