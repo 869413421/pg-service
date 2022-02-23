@@ -12,11 +12,14 @@ import (
 	pgSubscriber "github.com/869413421/pg-service/user/subscriber"
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus/v2"
+	ratelimiter "github.com/micro/go-plugins/wrapper/ratelimiter/uber/v2"
 	tracePlugin "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
 	"github.com/opentracing/opentracing-go"
 	"os"
 	"time"
 )
+
+const QPS = 1000
 
 func Run() {
 	//1.准备数据库连接，并且执行数据库迁移
@@ -41,6 +44,8 @@ func Run() {
 		micro.RegisterInterval(time.Second*20),
 		micro.WrapHandler(tracePlugin.NewHandlerWrapper(opentracing.GlobalTracer())),
 		micro.WrapHandler(prometheus.NewHandlerWrapper()),
+		//令牌桶算法通过控制从外界发送到本节点的请求速率来限流
+		micro.WrapHandler(ratelimiter.NewHandlerWrapper(QPS)),
 	)
 	service.Init()
 	container.SetService(service)

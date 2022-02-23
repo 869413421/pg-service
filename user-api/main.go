@@ -8,12 +8,16 @@ import (
 	"github.com/869413421/pg-service/common/pkg/wrapper/opentracing/gin2micro"
 	"github.com/869413421/pg-service/user-api/bootstarp"
 	pb "github.com/869413421/pg-service/user/proto/user"
+	"github.com/juju/ratelimit"
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/web"
+	ratelimiter "github.com/micro/go-plugins/wrapper/ratelimiter/ratelimit/v2"
 	"github.com/opentracing/opentracing-go"
 	"os"
 	"time"
 )
+
+const QPS = 1000
 
 func main() {
 	//1.创建gin并启动web服务
@@ -36,12 +40,14 @@ func main() {
 	defer io.Close()
 	opentracing.SetGlobalTracer(t)
 
-
 	// 3.创建用户服务客户端
+	bucket := ratelimit.NewBucketWithRate(float64(QPS), int64(QPS))
 	hystrix.Configure([]string{"pg.service.user.UserService.Auth"})
 	clientService := micro.NewService(
 		micro.Name("pg.api.user.cli"),
 		micro.WrapClient(hystrix.NewClientWrapper()),
+		//漏桶算法通过控制从本节点发出请求的速率来限流
+		micro.WrapClient(ratelimiter.NewClientWrapper(bucket, false)),
 	)
 
 	// 4.创建用户服务客户端

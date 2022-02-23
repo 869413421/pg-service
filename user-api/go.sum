@@ -12,9 +12,6 @@ cloud.google.com/go/pubsub v1.0.1/go.mod h1:R0Gpsv3s54REJCy4fxDixWD93lHJMoZTyQ2k
 cloud.google.com/go/storage v1.0.0/go.mod h1:IhtSnM/ZTZV8YYJWCY8RULGVqBDmpoyjwiyrjsg+URw=
 contrib.go.opencensus.io/exporter/ocagent v0.4.12/go.mod h1:450APlNTSR6FrvC3CTRqYosuDstRB9un7SOx2k/9ckA=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
-github.com/869413421/pg-service/common v0.0.0-20220122101130-3dce972d21c7/go.mod h1:eyzAhgvZ4CwX1+dKxQFKaeZ5CL88f7sLpAwikiHvdeE=
-github.com/869413421/pg-service/common v0.0.0-20220220120747-0f1d4860d8fd h1:MiNZvGXn7JO8X02pUzHY6YcXbq2CEvX2jiQlHYIq02s=
-github.com/869413421/pg-service/common v0.0.0-20220220120747-0f1d4860d8fd/go.mod h1:7gGm85ymrFjjL+naX6T5vUnX2RAkw9PKL/0Rs4WKFKQ=
 github.com/869413421/pg-service/user v0.0.0-20220127033843-d721ccd1897a h1:BQzmidhtxXM59dHMin2N5FW11j3s9+8PDZnSNhUiMik=
 github.com/869413421/pg-service/user v0.0.0-20220127033843-d721ccd1897a/go.mod h1:BBCZiMnxsI5A72/srUEsPhHUhLcMb91GqXHgpeGSILA=
 github.com/Azure/azure-sdk-for-go v32.4.0+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=
@@ -276,6 +273,8 @@ github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHm
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jtolds/gls v4.20.0+incompatible h1:xdiiI2gbIgH/gLH7ADydsJ1uDOEzR8yvV7C0MuV77Wo=
 github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfVYBRgL+9YlvaHOwJU=
+github.com/juju/ratelimit v1.0.2-0.20191002062651-f60b32039441 h1:b5Jqi7ir58EzfeZDyp7OSYQG/IVgyY4JWfHuJUF2AZI=
+github.com/juju/ratelimit v1.0.2-0.20191002062651-f60b32039441/go.mod h1:qapgC/Gy+xNh9UxzV13HGGl/6UXNN+ct+vwSgWNm/qk=
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
 github.com/jung-kurt/gofpdf v1.0.3-0.20190309125859-24315acbbda5/go.mod h1:7Id9E/uU8ce6rXgefFLlgrJj/GYY22cpxn+r32jIOes=
 github.com/kevinburke/ssh_config v0.0.0-20190725054713-01f96b0aa0cd h1:Coekwdh0v2wtGp9Gmz1Ze3eVRAWJMLokvN3QjdzCHLY=
@@ -320,8 +319,8 @@ github.com/micro/cli/v2 v2.1.2/go.mod h1:EguNh6DAoWKm9nmk+k/Rg0H3lQnDxqzu5x5srOt
 github.com/micro/go-micro/v2 v2.9.1 h1:+S9koIrNWARjpP6k2TZ7kt0uC9zUJtNXzIdZTZRms7Q=
 github.com/micro/go-micro/v2 v2.9.1/go.mod h1:x55ZM3Puy0FyvvkR3e0ha0xsE9DFwfPSUMWAIbFY0SY=
 github.com/micro/go-plugins/broker/rabbitmq/v2 v2.9.1/go.mod h1:HVSLIB7iIe7mw/yvzg65F+2qV57mkcMpWeTo0jdtZFA=
-github.com/micro/go-plugins/wrapper/breaker/hystrix/v2 v2.9.1 h1:cwnuDUzibCHuuPm10pKOAsxUWCCC7SxWN/WNpUwHT0I=
-github.com/micro/go-plugins/wrapper/breaker/hystrix/v2 v2.9.1/go.mod h1:Ap49tgWCkin0OmUQWg9cjAelLxN9nawvHs0ptgkvU/0=
+github.com/micro/go-plugins/wrapper/ratelimiter/ratelimit/v2 v2.9.1 h1:49utGV2NVd6WzS5QCbbOfxiVsTRrc1cKg+nPdbajjYI=
+github.com/micro/go-plugins/wrapper/ratelimiter/ratelimit/v2 v2.9.1/go.mod h1:oCU1l50hfVd/xrfsBNsCarnDY/7y9ZfxUzAy7QoRlpY=
 github.com/micro/go-plugins/wrapper/trace/opentracing/v2 v2.9.1/go.mod h1:JyDIUQgJ0noSBbxW2cuNWVAxmKXF5VeTbJ8JY1S1160=
 github.com/miekg/dns v1.1.15/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
 github.com/miekg/dns v1.1.27 h1:aEH/kqUzUxGJ/UHcEKdJY+ugH6WEzsEBBSPa8zuy1aM=
