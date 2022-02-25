@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/micro/go-micro/v2/config"
 	"github.com/micro/go-micro/v2/config/encoder/json"
 	"github.com/micro/go-micro/v2/config/source"
@@ -46,6 +47,7 @@ func LoadConfig() *Configuration {
 		etcdConfigKey := os.Getenv("ETCD_CONFIG_KEY")
 		serviceConfig = &Configuration{}
 		encoder := json.NewEncoder()
+		fmt.Println(os.Getwd())
 		fileSource := file.NewSource(file.WithPath("./config.json"), source.WithEncoder(encoder))
 		etcdSource := etcd.NewSource(
 			etcd.WithAddress(strings.Split(os.Getenv("MICRO_REGISTRY_ADDRESS"), ",")[0]),
