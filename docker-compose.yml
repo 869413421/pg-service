@@ -114,9 +114,9 @@ services:
       - etcd1
       - etcd2
       - etcd3
-      - pg-user-db
       - pg-rabbitmq
       - elasticsearch
+      - pg-user-kingshard
     build: ./user
     environment:
       MICRO_SERVER_ADDRESS: ":9091"
@@ -152,18 +152,70 @@ services:
     networks:
       - pg-network
 
-  pg-user-db:
+  pg-user-db-master:
     image: mysql:${MYSQL_VERSION}
     ports:
       - ${USER_DB_PORT}:3306
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - ./data/mysql/user-master:/var/lib/mysql
+    depends_on:
+      - pg-user-db-slave-1
+      - pg-user-db-slave-2
     restart: always
     environment:
       MYSQL_USER: ${USER_DB_USER}
       MYSQL_PASSWORD: ${USER_DB_PASSWORD}
       MYSQL_DATABASE: ${USER_DB_DATABASE}
       MYSQL_ROOT_PASSWORD: ${USER_DB_ROOT_PASSWORD}
+    command: ["mysqld","--server_id=1","--binlog_checksum=NONE","--gtid_mode=ON","--enforce_gtid_consistency=ON","--log_bin=replicas-mysql-bin","--log_slave_updates=ON","--master_info_repository=TABLE","--relay_log_info_repository=TABLE","--transaction_write_set_extraction=XXHASH64","--user=mysql","--skip-host-cache","--skip-name-resolve", "--default_authentication_plugin=mysql_native_password"]
+    networks:
+      - pg-network
+  
+  pg-user-db-slave-1:
+    image: mysql:${MYSQL_VERSION}
+    ports:
+      - ${USER_DB_SLAVE1_PORT}:3306
+    volumes:
+      - ./data/mysql/user-savle-1:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_USER: ${USER_DB_USER}
+      MYSQL_PASSWORD: ${USER_DB_PASSWORD}
+      MYSQL_DATABASE: ${USER_DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${USER_DB_ROOT_PASSWORD}
+    command: ["mysqld","--server_id=2","--binlog_checksum=NONE","--gtid_mode=ON","--enforce_gtid_consistency=ON","--log_bin","--log_slave_updates=ON","--master_info_repository=TABLE","--relay_log_info_repository=TABLE","--transaction_write_set_extraction=XXHASH64","--user=mysql","--skip-host-cache","--skip-name-resolve", "--default_authentication_plugin=mysql_native_password"]
+    networks:
+      - pg-network
+
+  pg-user-db-slave-2:
+    image: mysql:${MYSQL_VERSION}
+    ports:
+      - ${USER_DB_SLAVE2_PORT}:3306
+    volumes:
+      - ./data/mysql/user-savle-2:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_USER: ${USER_DB_USER}
+      MYSQL_PASSWORD: ${USER_DB_PASSWORD}
+      MYSQL_DATABASE: ${USER_DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${USER_DB_ROOT_PASSWORD}
+    command: ["mysqld","--server_id=3","--binlog_checksum=NONE","--gtid_mode=ON","--enforce_gtid_consistency=ON","--log_bin","--log_slave_updates=ON","--master_info_repository=TABLE","--relay_log_info_repository=TABLE","--transaction_write_set_extraction=XXHASH64","--user=mysql","--skip-host-cache","--skip-name-resolve", "--default_authentication_plugin=mysql_native_password"]
+    networks:
+      - pg-network
+
+  # 数据库中间件，读写分离，分库分表
+  pg-user-kingshard:
+    image: matjazmav/kingshard
+    volumes:
+      - ./config/kingshard/user/ks.yaml:/etc/ks.yaml
+    ports:
+      - "9697:9696"
+    # 暴露端口给link上的容器
+    expose:
+      - "9696"
+    depends_on:
+      - pg-user-db-master
+    restart: always
     networks:
       - pg-network
 

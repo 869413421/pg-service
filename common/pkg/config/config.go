@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"github.com/micro/go-micro/v2/config"
 	"github.com/micro/go-micro/v2/config/encoder/json"
 	"github.com/micro/go-micro/v2/config/source"
@@ -47,7 +46,6 @@ func LoadConfig() *Configuration {
 		etcdConfigKey := os.Getenv("ETCD_CONFIG_KEY")
 		serviceConfig = &Configuration{}
 		encoder := json.NewEncoder()
-		fmt.Println(os.Getwd())
 		fileSource := file.NewSource(file.WithPath("./config.json"), source.WithEncoder(encoder))
 		etcdSource := etcd.NewSource(
 			etcd.WithAddress(strings.Split(os.Getenv("MICRO_REGISTRY_ADDRESS"), ",")[0]),
@@ -78,8 +76,6 @@ func LoadConfig() *Configuration {
 			// 读取远程配置失败
 			log.Fatalf("etcd load config fail: %v", err)
 		}
-		log.Printf("config：%v", serviceConfig)
-		log.Printf("config map：%v", conf.Map())
 
 		//4.开启协程监听配置变更
 		go func() {
