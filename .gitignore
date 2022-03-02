@@ -22,3 +22,4 @@
 # vendor/
 
 .env
+terraform/main.tf
