@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/869413421/pg-service/common/pkg/password"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // BeforeSave 保存前模型事件

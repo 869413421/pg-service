@@ -5,7 +5,7 @@ import (
 	baseModel "github.com/869413421/pg-service/common/pkg/model"
 	string2 "github.com/869413421/pg-service/common/pkg/string"
 	"github.com/869413421/pg-service/user/pkg/repo"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"time"
 )
 

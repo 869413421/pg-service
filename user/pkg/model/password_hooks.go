@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/869413421/pg-service/common/pkg/container"
 	"github.com/869413421/pg-service/common/pkg/encoder"
-	"github.com/jinzhu/gorm"
 	"github.com/micro/go-micro/v2/broker"
+	"gorm.io/gorm"
 )
 
 var createTopic = "create.password.reset"

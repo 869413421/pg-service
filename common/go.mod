@@ -18,4 +18,6 @@ require (
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	gorm.io/driver/mysql v1.3.2
+	gorm.io/gorm v1.23.2
 )

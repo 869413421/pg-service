@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/869413421/pg-service/common/pkg/config"
 	"github.com/869413421/pg-service/common/pkg/types"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -34,17 +34,30 @@ func connectDB() *gorm.DB {
 	// 从系统环境变量获取数据库信息
 	serviceConfig := config.LoadConfig()
 	dbConfig = &serviceConfig.Db
-	db, err := gorm.Open(
-		"mysql",
-		fmt.Sprintf(
-			"%s:%s@(%s)/%s?charset=%s&parseTime=True&loc=Local",
-			dbConfig.User, dbConfig.Password, dbConfig.Address, dbConfig.Database, dbConfig.Charset,
-		),
-	)
+
+	db, err := gorm.Open(mysql.Open(fmt.Sprintf(
+		"%s:%s@(%s)/%s?charset=%s&parseTime=True&loc=Local",
+		dbConfig.User, dbConfig.Password, dbConfig.Address, dbConfig.Database, dbConfig.Charset,
+	)), &gorm.Config{})
 
 	if err != nil {
 		panic(fmt.Sprintf("connection to db error %v", err))
 	}
+
+	//db.Use(dbresolver.Register(dbresolver.Config{
+	//	// `db2` 作为 sources，`db3`、`db4` 作为 replicas
+	//	Sources:  []gorm.Dialector{mysql.Open("db2_dsn")},
+	//	Replicas: []gorm.Dialector{mysql.Open("db3_dsn"), mysql.Open("db4_dsn")},
+	//	// sources/replicas 负载均衡策略
+	//	Policy: dbresolver.RandomPolicy{},
+	//}).Register(dbresolver.Config{
+	//	// `db1` 作为 sources（DB 的默认连接），对于 `User`、`Address` 使用 `db5` 作为 replicas
+	//	Replicas: []gorm.Dialector{mysql.Open("db5_dsn")},
+	//}, &User{}, &Address{}).Register(dbresolver.Config{
+	//	// `db6`、`db7` 作为 sources，对于 `orders`、`Product` 使用 `db8` 作为 replicas
+	//	Sources:  []gorm.Dialector{mysql.Open("db6_dsn"), mysql.Open("db7_dsn")},
+	//	Replicas: []gorm.Dialector{mysql.Open("db8_dsn")},
+	//}, "orders", &Product{}, "secondary"))
 
 	return db
 }
@@ -54,7 +67,10 @@ func setupDB() {
 	conn := connectDB()
 	conn.Set("gorm:table_options", "ENGINE=InnoDB")
 	conn.Set("gorm:table_options", "Charset=utf8")
-	sqlDB := conn.DB()
+	sqlDB, err := conn.DB()
+	if err != nil {
+		panic(err)
+	}
 
 	//2.设置最大连接数
 	sqlDB.SetMaxOpenConns(dbConfig.MaxConnections)
@@ -73,7 +89,11 @@ func GetDB() *gorm.DB {
 		setupDB()
 	}
 
-	sqlDB := db.DB()
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
+
 	if err := sqlDB.Ping(); err != nil {
 		sqlDB.Close()
 		setupDB()

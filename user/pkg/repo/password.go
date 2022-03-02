@@ -3,7 +3,7 @@ package repo
 import (
 	baseModel "github.com/869413421/pg-service/common/pkg/model"
 	"github.com/869413421/pg-service/user/pkg/model"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 //PasswordRestRepositoryInterface 重置记录操作接口

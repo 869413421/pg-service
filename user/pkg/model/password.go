@@ -36,7 +36,7 @@ func (model *PasswordReset) Delete() (rowsAffected int64, err error) {
 
 // Update 更新数据库重置记录
 func (model *PasswordReset) Update() (rowsAffected int64, err error) {
-	result := baseModel.GetDB().Update(&model)
+	result := baseModel.GetDB().Save(&model)
 	err = result.Error
 	if err != nil {
 		return 0, err

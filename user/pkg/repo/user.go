@@ -4,7 +4,7 @@ import (
 	modelBase "github.com/869413421/pg-service/common/pkg/model"
 	"github.com/869413421/pg-service/common/pkg/pagination"
 	"github.com/869413421/pg-service/user/pkg/model"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // UserRepositoryInterface 用户CURD仓库接口

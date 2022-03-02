@@ -1,7 +1,7 @@
 package pagination
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"math"
 )
 
@@ -128,17 +128,17 @@ func (p Pagination) Results(data interface{}) error {
 		offset = (page - 1) * uint64(p.PerPage)
 	}
 
-	return p.DB.Debug().Limit(p.PerPage).Offset(offset).Find(data).Error
+	return p.DB.Debug().Limit(int(p.PerPage)).Offset(int(offset)).Find(data).Error
 }
 
 // TotalCount 返回的是数据库里的条数
 func (p *Pagination) TotalCount() uint64 {
 	if p.Count == 0 {
-		var count uint64
+		var count int64
 		if err := p.DB.Count(&count).Error; err != nil {
 			return 0
 		}
-		p.Count = count
+		p.Count = uint64(count)
 	}
 
 	return p.Count
