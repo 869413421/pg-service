@@ -12,5 +12,7 @@ require (
 	github.com/micro/go-micro/v2 v2.9.1
 	github.com/micro/go-plugins/wrapper/ratelimiter/ratelimit/v2 v2.9.1
 	github.com/opentracing/opentracing-go v1.1.0
-	golang.org/x/tools v0.0.0-20200323144430-8dcfad9e016e // indirect
+	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2 // indirect
+	github.com/swaggo/gin-swagger v1.4.1 // indirect
+	github.com/swaggo/swag v1.8.0 // indirect
 )

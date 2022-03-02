@@ -1,0 +1,44 @@
+basePath: /user
+host: localhost:8080
+info:
+  contact:
+    email: 13528685024@163.com
+    name: qingshui
+    url: https://qingshui.com
+  description: 用户服务API
+  title: 用户服务API
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户数据，支持分页
+      parameters:
+      - description: token
+        in: query
+        name: token
+        required: true
+        type: string
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        required: true
+        type: integer
+      - default: 10
+        description: 分页数量
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"errorMsg":"","data":{"users":[{"id":1,"password":"$2a$14$gJ6Iq2.cJ75v34OK.Mw/puJ9qZVcE79AESQa5AOBA6IzYbk/ukhxi","name":"huangyanming","email":"13528685024@163.com","phone":"13528685024","real_name":"黄彦铭11199","avatar":"121312312312","create_at":"2022-01-02
+            12:23:23","update_at":"2022-03-02 02:26:47"}],"total":1}}'
+          schema:
+            type: string
+      summary: 获取用户数据
+swagger: "2.0"

@@ -20,6 +20,17 @@ func NewUserController() *UserController {
 	return &UserController{}
 }
 
+// Index
+// Anything godoc
+// @Param token query string true "token"
+// @Param page query int true "页码" default(1)
+// @Param pageSize query int true "分页数量" default(10)
+// @Summary 获取用户数据
+// @Description 获取用户数据，支持分页
+// @Accept  json
+// @Produce  json
+// @Success 200 {string} string "{"code":200,"errorMsg":"","data":{"users":[{"id":1,"password":"$2a$14$gJ6Iq2.cJ75v34OK.Mw/puJ9qZVcE79AESQa5AOBA6IzYbk/ukhxi","name":"huangyanming","email":"13528685024@163.com","phone":"13528685024","real_name":"黄彦铭11199","avatar":"121312312312","create_at":"2022-01-02 12:23:23","update_at":"2022-03-02 02:26:47"}],"total":1}}"
+// @Router / [get]
 func (controller *UserController) Index(context *gin.Context) {
 	//1.获取context中的信息
 	ctx, ok := gin2micro.ContextWithSpan(context)
@@ -48,6 +59,7 @@ func (controller *UserController) Index(context *gin.Context) {
 	//4.响应用户信息
 	controller.ResponseJson(context, http.StatusOK, "", rsp)
 }
+
 
 func (controller *UserController) Store(context *gin.Context) {
 	//1.获取context中的信息
@@ -167,7 +179,6 @@ func (controller *UserController) Show(context *gin.Context) {
 	//4.响应用户信息
 	controller.ResponseJson(context, http.StatusOK, "", rsp.User)
 }
-
 
 func (controller *UserController) Auth(context *gin.Context) {
 	//1.获取context中的信息

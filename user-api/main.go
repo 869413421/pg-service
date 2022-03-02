@@ -7,6 +7,7 @@ import (
 	"github.com/869413421/pg-service/common/pkg/wrapper/breaker/hystrix"
 	"github.com/869413421/pg-service/common/pkg/wrapper/opentracing/gin2micro"
 	"github.com/869413421/pg-service/user-api/bootstarp"
+	_ "github.com/869413421/pg-service/user-api/docs"
 	pb "github.com/869413421/pg-service/user/proto/user"
 	"github.com/juju/ratelimit"
 	"github.com/micro/go-micro/v2"
@@ -19,6 +20,16 @@ import (
 
 const QPS = 1000
 
+// @title 用户服务API
+// @version 1.0
+// @description 用户服务API
+
+// @contact.name qingshui
+// @contact.url https://qingshui.com
+// @contact.email 13528685024@163.com
+
+// @host localhost:8080
+// @BasePath /user
 func main() {
 	//1.创建gin并启动web服务
 	g := bootstarp.SetupRoute()
