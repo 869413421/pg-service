@@ -6,7 +6,7 @@ go 1.16
 // see https://github.com/etcd-io/etcd/issues/11154 and https://github.com/etcd-io/etcd/issues/11931.
 replace google.golang.org/grpc => google.golang.org/grpc v1.26.0
 
-replace github.com/869413421/pg-service/common => ../common
+// replace github.com/869413421/pg-service/common => ../common
 
 require (
 	github.com/869413421/pg-service/common v0.0.0-20220122101130-3dce972d21c7

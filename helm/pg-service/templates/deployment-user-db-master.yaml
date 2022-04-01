@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-db-master
+  labels:
+  namespace: {{ .Values.namespace }}
+spec:
+  # pod数量
+  replicas: {{ .Values.userDbMaster.replicaCount }}
+  selector:
+    matchLabels:
+      app: user-db-master-pod
+  template:
+    metadata:
+      labels:
+        app: user-db-master-pod
+    spec:
+      containers:
+        - image: "{{ .Values.userDbMaster.image.repository }}:{{ .Values.userDbMaster.image.tag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ .Values.userDbMaster.image.pullPolicy }}
+          name: user-db-master
+          # 启动容器参数
+          args:
+            - mysqld
+            - --server_id=1
+            - --binlog_checksum=NONE
+            # - --gtid_mode=ON
+            # - --enforce_gtid_consistency=ON
+            - --log_bin=replicas-mysql-bin
+            - --log_slave_updates=ON
+            # - --master_info_repository=TABLE
+            # - --relay_log_info_repository=TABLE
+            # - --transaction_write_set_extraction=XXHASH64
+            - --user=mysql
+            - --skip-host-cache
+            - --skip-name-resolve
+            - --default_authentication_plugin=mysql_native_password
+          # 设置主机变量
+          env:
+            - name: MYSQL_DATABASE
+              value: {{ .Values.userDbMaster.mysqlDataBase }}
+            - name: MYSQL_USER
+              value: {{ .Values.userDbMaster.mysqlUser }}
+            - name: MYSQL_PASSWORD
+              value: {{ .Values.userDbMaster.mysqlPassword }}
+            - name: MYSQL_ROOT_PASSWORD
+              value: {{ .Values.userDbMaster.mysqlRootPassword }}
+          # 暴露容器端口
+          ports:
+            - name: http
+              containerPort: 3306
+              protocol: TCP
+          # 端口探针
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+              initialDelaySeconds: 30
+              periodSeconds: 10
+              successThreshold: 1
+              failureThreshold: 2
+              timeoutSeconds: 5
+          # 资源限制
+          resources:
+{{ toYaml .Values.userDbMaster.resources | indent 12 }}
+      restartPolicy: Always
+
