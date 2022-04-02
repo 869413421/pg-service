@@ -1,0 +1,89 @@
+{{- $namespace := .Values.namespace -}}
+{{- $database := .Values.mysqlDataBase -}}
+{{- $user := .Values.mysqlUser -}}
+{{- $password := .Values.mysqlPassword -}}
+{{- $rootPassword := .Values.mysqlRootPassword -}}
+
+{{- range $key, $val := .Values.examples }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $val.name }}
+  labels:
+  namespace: {{ $namespace }}
+spec:
+  # pod数量
+  replicas: {{ $val.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $val.name }}-pod
+  template:
+    metadata:
+      labels:
+        app: {{ $val.name }}-pod
+    spec:
+      containers:
+        - image: "{{ $val.image.repository }}:{{ $val.image.tag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ $val.image.pullPolicy }}
+          name: {{ $val.name }}
+          # 启动容器参数
+          args:
+            - mysqld
+            - --server_id= {{ $val.serverId }}
+            - --binlog_checksum=NONE
+            - --log_bin=replicas-mysql-bin
+            - --log_slave_updates=ON
+            - --user=mysql
+            - --skip-host-cache
+            - --skip-name-resolve
+            - --default_authentication_plugin=mysql_native_password
+          # 设置主机变量
+          env:
+            - name: MYSQL_DATABASE
+              value: {{ $database }}
+            - name: MYSQL_USER
+              value: {{ $user }}
+            - name: MYSQL_PASSWORD
+              value: {{ $password }}
+            - name: MYSQL_ROOT_PASSWORD
+              value: {{ $rootPassword }}
+          # 暴露容器端口
+          ports:
+            - name: http
+              containerPort: 3306
+              protocol: TCP
+          # 端口探针
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 2
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: "/var/lib/mysql"
+              subPath: "mysql" 
+            - name: config
+              mountPath: /etc/mysql/conf.d
+          # 资源限制
+          resources:
+{{ toYaml $val.resources | indent 12 }}
+      restartPolicy: Always
+      # 声明挂载
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: {{ $val.name }}-pvc
+            readOnly: false
+          volumes:
+        - name: config
+          configMap:
+            name: {{ $val.name }}-cm
+
+---
+{{-   end   }}
+
+

@@ -1,0 +1,21 @@
+{{- $nfcServer := .Values.nfsServer -}}
+{{- $namespace := .Values.namespace -}}
+{{- range $key, $val := .Values.examples }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $val.name }}-pv
+  labels:
+    app: {{ $val.name }}-pv
+spec:
+  nfs: #存储类型
+    path: /root/data/nfs/{{ $namespace }}/db/user/{{ $val.name }}
+    server: {{ $nfcServer }}
+  capacity: #存储能力  
+    storage: 5Gi
+  accessModes: #访问模式
+    - ReadWriteMany #多机器读写权限
+  persistentVolumeReclaimPolicy: Retain  # 回收策略，Ratain需要管理员手动删除
+  
+---
+{{-   end   }}

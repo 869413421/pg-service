@@ -1,0 +1,21 @@
+{{- $namespace := .Values.namespace -}}
+{{- range $key, $val := .Values.examples }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $val.name }}-service
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $val.name }}-service
+spec:
+  clusterIP: None
+  type: ClusterIP
+  ports:
+    - port: {{ $val.service.port }}
+      targetPort: {{ $val.service.port }}
+      protocol: TCP
+  selector:
+    app: {{ $val.name }}-pod
+
+---
+{{-   end   }}
