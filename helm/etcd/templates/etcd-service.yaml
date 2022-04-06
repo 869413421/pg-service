@@ -1,0 +1,51 @@
+{{- $namespace := .Values.namespace -}}
+{{- range $key, $val := .Values.examples }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $val.name }}-service
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $val.name }}-service
+spec:
+  clusterIP: {{ $val.service.clusterIP }}
+  type: ClusterIP
+  ports:
+    - port: {{ $val.service.containerPort }}
+      name: {{$val.name}}-container-port
+      targetPort: {{ $val.service.containerPort }}
+      protocol: TCP
+    - port: {{ $val.service.clusterPort }}
+      name: {{$val.name}}-cluster-port
+      targetPort: {{ $val.service.clusterPort }}
+      protocol: TCP
+  selector:
+    app: {{ $val.name }}-pod
+
+---
+{{-   end   }}
+
+{{ $e3wName := .Values.e3w.name }}
+{{ $e3wRepository := .Values.e3w.image.repository }}
+{{ $e3wTag := .Values.e3w.image.tag }}
+{{ $e3wPullPolicy := .Values.e3w.image.pullPolicy }}
+{{ $e3wPort := .Values.e3w.service.containerPort }}
+{{ $e3clusterIP := .Values.e3w.service.clusterIP }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $e3wName }}-service
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $e3wName }}-service
+spec:
+  clusterIP: {{ $e3clusterIP }}
+  type: ClusterIP
+  ports:
+    - port: {{ $e3wPort }}
+      name: {{ $e3wName }}-container-port
+      targetPort: {{ $e3wPort }}
+      protocol: TCP
+  selector:
+    app: {{ $e3wName }}-pod

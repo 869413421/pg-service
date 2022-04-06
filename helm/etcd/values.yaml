@@ -1,0 +1,89 @@
+# Default values for pg-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: pg-service
+nfsServer: 192.168.72.100
+e3w:
+  name: e3w
+  image:
+      repository: soyking/e3w
+      tag: latest
+      pullPolicy: IfNotPresent
+
+  service:
+      clusterIP: 10.98.55.209
+      containerPort: 8080
+
+examples:
+  etcd1: 
+    name: "etcd1"
+    host: "etcd1"
+    replicaCount: 1
+    serverId: 1
+    image:
+      repository: bitnami/etcd
+      tag: latest
+      pullPolicy: IfNotPresent
+    
+    service:
+      clusterIP: 10.98.55.200
+      containerPort: 2379
+      clusterPort: 2380
+
+    resources: 
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+        
+  etcd2: 
+    name: "etcd2"
+    host: "etcd2"
+    replicaCount: 1
+    serverId: 2
+    image:
+      repository: bitnami/etcd
+      tag: latest
+      pullPolicy: IfNotPresent
+    
+    service:
+      clusterIP: 10.98.55.201
+      containerPort: 2379
+      clusterPort: 2380
+
+
+    resources: 
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  etcd3: 
+    name: "etcd3"
+    host: "etcd3"
+    replicaCount: 1
+    serverId: 2
+    image:
+      repository: bitnami/etcd
+      tag: latest
+      pullPolicy: IfNotPresent
+    
+    service:
+      clusterIP: 10.98.55.202
+      containerPort: 2379
+      clusterPort: 2380
+      
+    resources: 
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+

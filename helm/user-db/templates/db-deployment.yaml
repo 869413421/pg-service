@@ -30,7 +30,7 @@ spec:
           # 启动容器参数
           args:
             - mysqld
-            - --server_id= {{ $val.serverId }}
+            - --server_id={{ $val.serverId }}
             - --binlog_checksum=NONE
             - --log_bin=replicas-mysql-bin
             - --log_slave_updates=ON
@@ -50,7 +50,7 @@ spec:
               value: {{ $rootPassword }}
           # 暴露容器端口
           ports:
-            - name: http
+            - name: tcp
               containerPort: 3306
               protocol: TCP
           # 端口探针
@@ -78,7 +78,6 @@ spec:
           persistentVolumeClaim:
             claimName: {{ $val.name }}-pvc
             readOnly: false
-          volumes:
         - name: config
           configMap:
             name: {{ $val.name }}-cm

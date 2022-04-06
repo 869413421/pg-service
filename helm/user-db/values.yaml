@@ -16,7 +16,7 @@ examples:
       pullPolicy: IfNotPresent
     
     service:
-      type: ClusterIP
+      clusterIP: 10.98.55.100
       port: 3306
 
     resources: 
@@ -27,27 +27,27 @@ examples:
         cpu: 100m
         memory: 128Mi
         
-  # userDbSlave1: 
-  #   name: "user-db-slave1"
-  #   host: "user.db.slave1"
-  #   replicaCount: 1
-  #   serverId: 2
-  #   image:
-  #     repository: mariadb
-  #     tag: 10.7
-  #     pullPolicy: IfNotPresent
+  userDbSlave1: 
+    name: "user-db-slave1"
+    host: "user.db.slave1"
+    replicaCount: 1
+    serverId: 2
+    image:
+      repository: mariadb
+      tag: 10.7
+      pullPolicy: IfNotPresent
     
-  #   service:
-  #     type: ClusterIP
-  #     port: 3306
+    service:
+      clusterIP: 10.98.55.101
+      port: 3306
 
-  #   resources: 
-  #     limits:
-  #       cpu: 1
-  #       memory: 1Gi
-  #     requests:
-  #       cpu: 100m
-  #       memory: 128Mi
+    resources: 
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 128Mi
 
 
 mysqlDataBase: pg_user

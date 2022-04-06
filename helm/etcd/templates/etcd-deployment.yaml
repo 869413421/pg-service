@@ -1,0 +1,129 @@
+{{- $namespace := .Values.namespace -}}
+{{- $examples := .Values.examples -}}
+
+{{- range $key, $val := $examples }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $val.name }}
+  labels:
+  namespace: {{ $namespace }}
+spec:
+  # pod数量
+  replicas: {{ $val.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $val.name }}-pod
+  template:
+    metadata:
+      labels:
+        app: {{ $val.name }}-pod
+    spec:
+      containers:
+        - image: "{{ $val.image.repository }}:{{ $val.image.tag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ $val.image.pullPolicy }}
+          name: {{ $val.name }}
+          # 设置主机变量
+          env:
+            - name: ALLOW_NONE_AUTHENTICATION
+              value: "yes"
+            - name: ETCD_NAME
+              value: {{ $val.name }}
+            - name: ETCD_INITIAL_ADVERTISE_PEER_URLS
+              value: "http://{{ $val.service.clusterIP }}:2380"
+            - name: ETCD_LISTEN_PEER_URLS
+              value: "http://0.0.0.0:2380"
+            - name: ETCD_LISTEN_CLIENT_URLS
+              value: "http://0.0.0.0:2379"
+            - name: ETCD_ADVERTISE_CLIENT_URLS
+              value: "http://{{ $val.service.clusterIP }}:2379"
+            - name: ETCD_INITIAL_CLUSTER_TOKEN
+              value: "etcd-cluster"
+            - name: "ETCD_INITIAL_CLUSTER"
+              value: "{{- range $etcdkey, $etcdVal := $examples }}{{ $etcdVal.name }}=http://{{ $etcdVal.service.clusterIP }}:2380,{{-   end   }}"
+            - name: ETCD_INITIAL_CLUSTER_STATE
+              value: "new"
+          # 暴露容器端口
+          ports:
+            - name: tcp
+              containerPort: 2380
+              protocol: TCP
+            - name: cluster
+              containerPort: 2379
+              protocol: TCP
+          # 端口探针
+          livenessProbe:
+            tcpSocket:
+              port: 2379
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 2
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: etcd-storage
+              mountPath: "/bitnami/etcd"
+              subPath: "etcd" 
+          # 资源限制
+          resources:
+{{ toYaml $val.resources | indent 12 }}
+      restartPolicy: Always
+      # 声明挂载
+      volumes:
+        - name: etcd-storage
+          persistentVolumeClaim:
+            claimName: {{ $val.name }}-pvc
+            readOnly: false
+
+---
+{{-   end   }}
+{{ $e3wName := .Values.e3w.name }}
+{{ $e3wRepository := .Values.e3w.image.repository }}
+{{ $e3wTag := .Values.e3w.image.tag }}
+{{ $e3wPullPolicy := .Values.e3w.image.pullPolicy }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $e3wName }}
+  labels:
+  namespace: {{ $namespace }}
+spec:
+  # pod数量
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $e3wName }}-pod
+  template:
+    metadata:
+      labels:
+        app: {{ $e3wName }}-pod
+    spec:
+      containers:
+        - image: "{{ $e3wRepository }}:{{ $e3wTag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ $e3wPullPolicy }}
+          name: {{ $e3wName }}
+          ports:
+            - name: tcp
+              containerPort: 8080
+              protocol: TCP
+          # 端口探针
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 2
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: "/app/conf/config.default.ini"
+      restartPolicy: Always
+      volumes:
+        - name: config
+          configMap:
+            name: {{ $e3wName }}-cm
+

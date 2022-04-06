@@ -1,0 +1,19 @@
+{{- $namespace := .Values.namespace -}}
+{{- range $key, $val := .Values.examples }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: 
+  name: {{ $val.name }}-pvc
+  namespace: {{ $namespace }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  selector:
+    matchLabels:
+      app: {{ $val.name }}-pv
+  resources: # 请求空间
+    requests:
+      storage: 5Gi
+      
+---
+{{-   end   }}
