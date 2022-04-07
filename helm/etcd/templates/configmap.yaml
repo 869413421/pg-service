@@ -9,7 +9,7 @@ metadata:
   labels:
     app: {{ $e3wName }}-cm
 data:
-  my.cnf: |
+  config.default.ini: |
     [app]
     port=8080
     auth=false

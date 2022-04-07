@@ -24,7 +24,7 @@ spec:
           # 镜像拉取策略
           imagePullPolicy: {{ $val.image.pullPolicy }}
           name: {{ $val.name }}
-          # 设置主机变量
+          #设置主机变量
           env:
             - name: ALLOW_NONE_AUTHENTICATION
               value: "yes"
@@ -40,7 +40,7 @@ spec:
               value: "http://{{ $val.service.clusterIP }}:2379"
             - name: ETCD_INITIAL_CLUSTER_TOKEN
               value: "etcd-cluster"
-            - name: "ETCD_INITIAL_CLUSTER"
+            - name: ETCD_INITIAL_CLUSTER
               value: "{{- range $etcdkey, $etcdVal := $examples }}{{ $etcdVal.name }}=http://{{ $etcdVal.service.clusterIP }}:2380,{{-   end   }}"
             - name: ETCD_INITIAL_CLUSTER_STATE
               value: "new"
@@ -120,7 +120,7 @@ spec:
             timeoutSeconds: 5
           volumeMounts:
             - name: config
-              mountPath: "/app/conf/config.default.ini"
+              mountPath: "/app/conf"
       restartPolicy: Always
       volumes:
         - name: config
