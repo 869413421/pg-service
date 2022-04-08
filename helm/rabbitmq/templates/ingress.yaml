@@ -1,16 +1,14 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: user-db
+  name: rabbitmq
   namespace: {{ .Values.namespace }}
 spec:
   rules:
-{{- range $key, $val := .Values.examples }}
-  - host: {{ $val.host }}
+  - host: {{ .Values.host }}
     http:
       paths:
       - path: 
         backend:
-          serviceName: {{ $val.name }}-service
-          servicePort: {{ $val.service.port }}
-{{-   end   }}
+          serviceName: {{ .Values.name }}-service
+          servicePort: 15672

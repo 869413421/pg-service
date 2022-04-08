@@ -1,21 +1,22 @@
-{{- $namespace := .Values.namespace -}}
-{{- range $key, $val := .Values.examples }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $val.name }}-service
-  namespace: {{ $namespace }}
+  name: {{ .Values.name }}-service
+  namespace: {{ .Values.namespace }}
   labels:
-    app: {{ $val.name }}-service
+    app: {{ .Values.name }}-service
 spec:
-  clusterIP: {{ $val.service.clusterIP }}
+  clusterIP: {{ .Values.service.clusterIP }}
   type: ClusterIP
   ports:
-    - port: {{ $val.service.port }}
-      targetPort: {{ $val.service.port }}
+    - port: 15672
+      name: tcp-port
+      targetPort: 15672
+      protocol: TCP
+    - port: 5672
+      name: http-port
+      targetPort: 5672
       protocol: TCP
   selector:
-    app: {{ $val.name }}-pod
+    app: {{ .Values.name }}-pod
 
----
-{{-   end   }}

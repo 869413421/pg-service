@@ -4,54 +4,25 @@
 
 namespace: pg-service
 nfsServer: 192.168.72.100
-examples:
-  userDbMaster: 
-    name: "user-db-master"
-    host: "user.db.master"
-    replicaCount: 1
-    serverId: 1
-    image:
-      repository: mariadb
-      tag: 10.7
-      pullPolicy: IfNotPresent
-    
-    service:
-      clusterIP: 10.98.55.100
-      port: 3306
+name: rabbitmq
+replicaCount: 1
+host: rabbitmq
 
-    resources: 
-      limits:
-        cpu: 1
-        memory: 1Gi
-      requests:
-        cpu: 100m
-        memory: 128Mi
-        
-  userDbSlave1: 
-    name: "user-db-slave1"
-    host: "user.db.slave1"
-    replicaCount: 1
-    serverId: 2
-    image:
-      repository: mariadb
-      tag: 10.7
-      pullPolicy: IfNotPresent
-    
-    service:
-      clusterIP: 10.98.55.101
-      port: 3306
+image:
+  repository: rabbitmq
+  tag: latest
+  pullPolicy: IfNotPresent
 
-    resources: 
-      limits:
-        cpu: 1
-        memory: 1Gi
-      requests:
-        cpu: 100m
-        memory: 128Mi
+service:
+  clusterIP: 10.98.55.210
 
+resources: 
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
-mysqlDataBase: pg_user
-mysqlUser: pg_user
-mysqlPassword: pg_user
-mysqlRootPassword: root
-
+user: root
+password: root

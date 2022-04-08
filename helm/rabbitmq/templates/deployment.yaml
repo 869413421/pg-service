@@ -1,88 +1,57 @@
 {{- $namespace := .Values.namespace -}}
-{{- $database := .Values.mysqlDataBase -}}
-{{- $user := .Values.mysqlUser -}}
-{{- $password := .Values.mysqlPassword -}}
-{{- $rootPassword := .Values.mysqlRootPassword -}}
+{{- $user := .Values.user -}}
+{{- $password := .Values.password -}}
+{{- $name := .Values.name -}}
 
-{{- range $key, $val := .Values.examples }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $val.name }}
+  name: {{ $name }}
   labels:
   namespace: {{ $namespace }}
 spec:
   # pod数量
-  replicas: {{ $val.replicaCount }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ $val.name }}-pod
+      app: {{ $name }}-pod
   template:
     metadata:
       labels:
-        app: {{ $val.name }}-pod
+        app: {{ $name }}-pod
     spec:
       containers:
-        - image: "{{ $val.image.repository }}:{{ $val.image.tag }}"
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           # 镜像拉取策略
-          imagePullPolicy: {{ $val.image.pullPolicy }}
-          name: {{ $val.name }}
-          # 启动容器参数
-          args:
-            - mysqld
-            - --server_id={{ $val.serverId }}
-            - --binlog_checksum=NONE
-            - --log_bin=replicas-mysql-bin
-            - --log_slave_updates=ON
-            - --user=mysql
-            - --skip-host-cache
-            - --skip-name-resolve
-            - --default_authentication_plugin=mysql_native_password
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: {{ $name }}
           # 设置主机变量
           env:
-            - name: MYSQL_DATABASE
-              value: {{ $database }}
-            - name: MYSQL_USER
+            - name: RABBITMQ_DEFAULT_USER
               value: {{ $user }}
-            - name: MYSQL_PASSWORD
+            - name: RABBITMQ_DEFAULT_PASS
               value: {{ $password }}
-            - name: MYSQL_ROOT_PASSWORD
-              value: {{ $rootPassword }}
           # 暴露容器端口
           ports:
             - name: tcp
-              containerPort: 3306
+              containerPort: 15672
               protocol: TCP
-          # 端口探针
-          livenessProbe:
-            tcpSocket:
-              port: 3306
-            initialDelaySeconds: 3
-            periodSeconds: 10
-            successThreshold: 1
-            failureThreshold: 2
-            timeoutSeconds: 5
+            - name: http
+              containerPort: 5672
+              protocol: TCP
           volumeMounts:
-            - name: mysql-storage
-              mountPath: "/var/lib/mysql"
-              subPath: "mysql" 
-            - name: config
-              mountPath: /etc/mysql/conf.d
+            - name: mq-storage
+              mountPath: "/var/lib/rabbitmq"
+              subPath: "rabbitmq" 
           # 资源限制
           resources:
-{{ toYaml $val.resources | indent 12 }}
+{{ toYaml .Values.resources | indent 12 }}
       restartPolicy: Always
       # 声明挂载
       volumes:
-        - name: mysql-storage
+        - name: mq-storage
           persistentVolumeClaim:
-            claimName: {{ $val.name }}-pvc
+            claimName: {{ $name }}-pvc
             readOnly: false
-        - name: config
-          configMap:
-            name: {{ $val.name }}-cm
-
----
-{{-   end   }}
 
 

@@ -1,19 +1,10 @@
-{{- $namespace := .Values.namespace -}}
-{{- range $key, $val := .Values.examples }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $val.name }}-cm
-  namespace: {{ $namespace }}
+  name: {{ .Values.name }}-cm
+  namespace: {{ .Values.namespace }}
   labels:
-    app: {{ $val.name }}-cm
+    app: {{ .Values.name }}-cm
 data:
-  my.cnf: |
-    [mysqld]
-    max_connections = 600
-    read_buffer_size = 1048576
-    net_read_timeout = 360
-    net_write_timeout = 360
-
----
-{{-   end   }}
+  config: |
+    [rabbitmq]
