@@ -1,0 +1,22 @@
+# Default values for pg-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: pg-service
+apiName: micro-api
+webName: micro-web
+apiReplicaCount: 1
+webReplicaCount: 1
+apiHost: micro-api
+webHost: micro-web
+
+image:
+  repository: micro/micro
+  tag: v2.9.3
+  pullPolicy: IfNotPresent
+
+service:
+  apiClusterIP: 10.98.55.140
+  webClusterIP: 10.98.55.141
+
+

@@ -1,0 +1,77 @@
+{{- $namespace := .Values.namespace -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.apiName }}
+  labels:
+  namespace: {{ $namespace }}
+spec:
+  # pod数量
+  replicas: {{ .Values.apiReplicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.apiName }}-pod
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.apiName }}-pod
+    spec:
+      containers:
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: {{ .Values.apiName }}
+          # 暴露容器端口
+          env:
+            - name: MICRO_REGISTRY
+              value: "etcd"
+            - name: MICRO_REGISTRY_ADDRESS
+              value: "10.98.55.200:2379,10.98.55.201:2379,10.98.55.202:2379"
+          command: ["./micro","api"]
+          args: 
+            - --handler=http
+            - --namespace=pg.api
+          ports:
+            - name: tcp
+              containerPort: 8080
+              protocol: TCP
+      restartPolicy: Always
+
+---  
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.webName }}
+  labels:
+  namespace: {{ $namespace }}
+spec:
+  # pod数量
+  replicas: {{ .Values.webReplicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.webName }}-pod
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.webName }}-pod
+    spec:
+      containers:
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: {{ .Values.webName }}
+          command: ["./micro","web"]
+          env:
+            - name: MICRO_REGISTRY
+              value: "etcd"
+            - name: MICRO_REGISTRY_ADDRESS
+              value: "10.98.55.200:2379,10.98.55.201:2379,10.98.55.202:2379"
+          # 暴露容器端口
+          ports:
+            - name: tcp
+              containerPort: 8082
+              protocol: TCP
+      restartPolicy: Always
+

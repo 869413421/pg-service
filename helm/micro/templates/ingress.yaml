@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: micro
+  namespace: {{ .Values.namespace }}
+spec:
+  rules:
+  - host: {{ .Values.apiHost }}
+    http:
+      paths:
+      - path: 
+        backend:
+          serviceName: {{ .Values.apiName }}-service
+          servicePort: 8080
+  - host: {{ .Values.webHost }}
+    http:
+      paths:
+      - path: 
+        backend:
+          serviceName: {{ .Values.webName }}-service
+          servicePort: 8082
