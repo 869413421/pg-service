@@ -1,0 +1,40 @@
+{{- $namespace := .Values.namespace -}}
+{{- $name := .Values.name -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+  namespace: {{ $namespace }}
+spec:
+  # pod数量
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $name }}-pod
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}-pod
+    spec:
+      containers:
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: {{ $name }}
+          # 暴露容器端口
+          ports:
+            - name: tcp
+              containerPort: 16686
+              protocol: TCP
+            - name: http
+              containerPort: 6831
+              protocol: TCP
+
+          # 资源限制
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      restartPolicy: Always
+  
+

@@ -1,0 +1,24 @@
+# Default values for pg-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: pg-service
+name: jaeger
+replicaCount: 1
+host: jaeger
+
+image:
+  repository: jaegertracing/all-in-one
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  clusterIP: 10.98.55.220
+
+resources: 
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 128Mi
