@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: user-service
+  namespace: {{ .Values.namespace }}
+spec:
+  rules:
+  - host: {{ .Values.host }}
+    http:
+      paths:
+      - path: 
+        backend:
+          serviceName: {{ .Values.name }}-service
+          servicePort: 9091

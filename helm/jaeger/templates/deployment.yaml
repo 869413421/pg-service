@@ -25,11 +25,14 @@ spec:
           name: {{ $name }}
           # 暴露容器端口
           ports:
-            - name: tcp
+            - name: client-port
               containerPort: 16686
               protocol: TCP
-            - name: http
+            - name: server-port
               containerPort: 6831
+              protocol: UDP
+            - name: api-port
+              containerPort: 14268
               protocol: TCP
 
           # 资源限制

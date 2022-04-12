@@ -9,17 +9,9 @@ spec:
   clusterIP: {{ .Values.service.clusterIP }}
   type: ClusterIP
   ports:
-    - port: 6831
-      name: udp-port
-      targetPort: 6831
-      protocol: UDP
-    - port: 16686
-      name: http-port
-      targetPort: 16686
-      protocol: TCP
-    - port: 14268
-      name: api-port
-      targetPort: 14268
+    - port: 9091
+      name: rpc-port
+      targetPort: 9091
       protocol: TCP
   selector:
     app: {{ .Values.name }}-pod

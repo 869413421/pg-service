@@ -1,0 +1,72 @@
+{{- $namespace := .Values.namespace -}}
+{{- $name := .Values.name -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+  namespace: {{ $namespace }}
+spec:
+  # pod数量
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $name }}-pod
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}-pod
+    spec:
+      containers:
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: {{ $name }}
+          # 暴露容器端口
+          ports:
+            - name: tcp
+              containerPort: 9091
+              protocol: TCP
+          env:
+            - name: MICRO_SERVER_ADDRESS
+              value: ":9091"
+            - name: MICRO_REGISTRY
+              value: "{{ .Values.microRegistry }}"
+            - name: MICRO_REGISTRY_ADDRESS
+              value: "{{ .Values.microRegistryAddress }}"
+            - name: MICRO_BROKER
+              value: "{{ .Values.microBroker }}"
+            - name: MICRO_BROKER_ADDRESS
+              value: "{{ .Values.microBrokerAddress }}"
+            - name: MICRO_TRACE_SERVER
+              value: "{{ .Values.microTraceServer }}"
+            - name: MICRO_TRACE_ENDPOINT
+              value: "{{ .Values.microTraceEndpoint }}"
+            - name: ENABLE_REMOTE_CONFIG
+              value: "{{ .Values.enableRemoteCongig }}"
+            - name: ETCD_CONFIG_KEY
+              value: "{{ .Values.etcdConfigKey }}"
+          volumeMounts:
+            - name: logs-storage
+              mountPath: "/app/logs"
+              subPath: "logs"
+            # - name: test-storage
+            #   mountPath: "/app"
+            #   subPath: "app"
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      restartPolicy: Always
+       # 声明挂载
+      volumes:
+        - name: logs-storage
+          persistentVolumeClaim:
+            claimName: {{ $name }}-pvc
+            readOnly: false
+
+        # - name: test-storage
+        #   persistentVolumeClaim:
+        #     claimName: user-test-pvc
+        #     readOnly: false
+  
+

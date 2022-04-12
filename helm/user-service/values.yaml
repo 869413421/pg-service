@@ -1,0 +1,33 @@
+# Default values for pg-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: pg-service
+name: user-service
+replicaCount: 1
+host: user.service
+nfsServer: 192.168.72.100
+
+image:
+  repository: qingshui869413421/user-service
+  tag: v1.1
+  pullPolicy: IfNotPresent
+
+service:
+  clusterIP: 10.98.55.150
+
+microRegistry: etcd
+microRegistryAddress: 10.98.55.200:2379,10.98.55.201:2379,10.98.55.202:2379
+microBroker: rabbitmq
+microBrokerAddress: amqp://root:root@10.98.55.210:5672
+microTraceServer: 10.98.55.220:6831
+microTraceEndpoint: 10.98.55.220:14268/api/traces
+enableRemoteCongig: true
+etcdConfigKey: pg-user-service
+resources: 
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 128Mi
