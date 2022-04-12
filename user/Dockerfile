@@ -34,7 +34,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 	apk add curl 
 
 # 和上个阶段一样设置工作目录
-RUN mkdir /app
+RUN mkdir -p /app/logs
 WORKDIR /app
 
 # 这一步不再从宿主机拷贝二进制文件，而是从上一个阶段构建的 builder 容器中拉取
