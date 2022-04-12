@@ -19,18 +19,18 @@ spec:
 
 --- 
 
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: user-test-pv
-  labels:
-    app: user-test-pv
-spec:
-  nfs: #存储类型
-    path: /root/data/nfs/{{ $namespace }}/user-service
-    server: {{ $nfcServer }}
-  capacity: #存储能力  
-    storage: 5Gi
-  accessModes: #访问模式
-    - ReadWriteMany #多机器读写权限
-  persistentVolumeReclaimPolicy: Retain  # 回收策略，Ratain需要管理员手动删除
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: user-test-pv
+#   labels:
+#     app: user-test-pv
+# spec:
+#   nfs: #存储类型
+#     path: /root/data/nfs/{{ $namespace }}/user-service
+#     server: {{ $nfcServer }}
+#   capacity: #存储能力  
+#     storage: 5Gi
+#   accessModes: #访问模式
+#     - ReadWriteMany #多机器读写权限
+#   persistentVolumeReclaimPolicy: Retain  # 回收策略，Ratain需要管理员手动删除
