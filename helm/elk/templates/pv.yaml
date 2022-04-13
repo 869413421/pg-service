@@ -1,0 +1,37 @@
+{{- $nfcServer := .Values.nfsServer -}}
+{{- $namespace := .Values.namespace -}}
+{{ $es := .Values.es}}
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $es.name }}-pv
+  labels:
+    app: {{ $es.name }}-pv
+spec:
+  nfs: #存储类型
+    path: /root/data/nfs/{{ $namespace }}/elk/elasticsearch/{{ $es.name }}
+    server: {{ $nfcServer }}
+  capacity: #存储能力  
+    storage: 5Gi
+  accessModes: #访问模式
+    - ReadWriteMany #多机器读写权限
+  persistentVolumeReclaimPolicy: Retain  # 回收策略，Ratain需要管理员手动删除
+
+--- 
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $es.name }}-log-pv
+  labels:
+    app: {{ $es.name }}-log-pv
+spec:
+  nfs: #存储类型
+    path: /root/data/nfs/{{ $namespace }}/elk/elasticsearch/{{ $es.name }}/logs
+    server: {{ $nfcServer }}
+  capacity: #存储能力  
+    storage: 5Gi
+  accessModes: #访问模式
+    - ReadWriteMany #多机器读写权限
+  persistentVolumeReclaimPolicy: Retain  # 回收策略，Ratain需要管理员手动删除

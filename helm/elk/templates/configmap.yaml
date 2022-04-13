@@ -1,0 +1,84 @@
+{{ $es := .Values.es }}
+{{ $kibana := .Values.kibana }}
+{{ $logstash := .Values.logstash}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $es.name }}-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ $es.name }}-cm
+data:
+  elasticsearch.yml: |
+    cluster.name: "elasticsearch" #集群名
+    network.host: 0.0.0.0 #主机ip
+    http.cors.enabled: true #允许跨域，集群需要设置
+    http.cors.allow-origin: "*" #跨域设置
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $kibana.name }}-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ $kibana.name }}-cm
+data:
+  kibana.yml: |
+    server.name: kibana
+    server.host: "0"
+    elasticsearch.hosts: [ "http://10.98.55.160:9200" ]
+    monitoring.ui.container.elasticsearch.enabled: true
+    i18n.locale: "zh-CN"
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $logstash.name }}-cnf-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ $logstash.name }}-cm
+data:
+  logstash.conf: |
+    input {
+      beats {
+        # 端口
+        port => "5044"
+      }
+    }
+
+    output {
+      if "user-service" in [tags] {
+        elasticsearch {
+          hosts => ["http://10.98.55.160:9200"]
+          index => "user-service-%{+YYYY.MM.dd}"
+        }
+      }
+
+      if "user-api" in [tags] {
+        elasticsearch {
+          hosts => ["http://10.98.55.160:9200"]
+          index => "user-api-%{+YYYY.MM.dd}"
+        }
+      }
+      
+      stdout { codec => rubydebug }
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $logstash.name }}-yaml-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ $logstash.name }}-cm
+data:
+  logstash.yaml: |
+    ## 和kibana的host一样，也需要设置成0.0.0.0才能启动成功
+    http.host: "0.0.0.0"
+    ## 除了可以使用docker-compose.yml中elasticsearch的容器名如 "http://elasticsearch:9200"（前提是同属于一个docker network，且类型为bridge），也可以直接改成公网ip
+    xpack.monitoring.elasticsearch.hosts: [ "http://10.98.55.160:9200" ]

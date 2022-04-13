@@ -1,0 +1,23 @@
+{{ $es := .Values.es}}
+{{ $kibana := .Values.kibana}}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: elk
+  namespace: {{ .Values.namespace }}
+spec:
+  rules:
+  - host: {{ $es.host }}
+    http:
+      paths:
+      - path: 
+        backend:
+          serviceName: {{ $es.name }}-service
+          servicePort: 9200
+  - host: {{ $kibana.host }}
+    http:
+      paths:
+      - path: 
+        backend:
+          serviceName: {{ $kibana.name }}-service
+          servicePort: 5601

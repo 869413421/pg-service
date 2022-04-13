@@ -1,0 +1,168 @@
+{{- $namespace := .Values.namespace -}}
+{{ $es := .Values.es}}
+{{ $kibana := .Values.kibana}}
+{{ $logstash := .Values.logstash}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $es.name }}
+  labels:
+  namespace: {{ $namespace }}
+spec:
+  # pod数量
+  replicas: {{ $es.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $es.name }}-pod
+  template:
+    metadata:
+      labels:
+        app: {{ $es.name }}-pod
+    spec:
+      containers:
+        - image: "{{ $es.image.repository }}:{{ $es.image.tag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ $es.image.pullPolicy }}
+          name: {{ $es.name }}
+          # 暴露容器端口
+          ports:
+            - name: client
+              containerPort: 9200
+              protocol: TCP
+            - name: service
+              containerPort: 9300
+              protocol: TCP
+          env:
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+            - name: discovery.type
+              value: "single-node"
+            - name: bootstrap.memory_lock
+              value: "true"
+          volumeMounts:
+            - name: data-storage
+              mountPath: "/usr/share/elasticsearch/data"
+              subPath: "data"
+            - name: log-storage
+              mountPath: "/usr/share/elasticsearch/logs"
+              subPath: "logs"
+            - name: config
+              mountPath: "/usr/share/elasticsearch/config/"
+      restartPolicy: Always
+      nodeName: node1
+      # 声明挂载
+      volumes:
+        - name: data-storage
+          persistentVolumeClaim:
+            claimName: {{ $es.name }}-pvc
+            readOnly: false
+        - name: log-storage
+          persistentVolumeClaim:
+            claimName: {{ $es.name }}-log-pvc
+            readOnly: false
+        - name: config
+          configMap:
+            name: {{ $es.name }}-cm
+
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $kibana.name }}
+  labels:
+  namespace: {{ $namespace }}
+spec:
+  # pod数量
+  replicas: {{ $kibana.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $kibana.name }}-pod
+  template:
+    metadata:
+      labels:
+        app: {{ $kibana.name }}-pod
+    spec:
+      containers:
+        - image: "{{ $kibana.image.repository }}:{{ $kibana.image.tag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ $kibana.image.pullPolicy }}
+          name: {{ $kibana.name }}
+          # 暴露容器端口
+          ports:
+            - name: client
+              containerPort: 5601
+              protocol: TCP
+          env:
+            - name: KIBANA_ELASTICSEARCH_URL
+              value: "http://10.98.55.160:9200"
+          volumeMounts:
+            - name: config
+              mountPath: "/usr/share/kibana/config/"
+      restartPolicy: Always
+      # 声明挂载
+      volumes:
+        - name: config
+          configMap:
+            name: {{ $kibana.name }}-cm
+      nodeName: node2
+
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $logstash.name }}
+  labels:
+  namespace: {{ $namespace }}
+spec:
+  # pod数量
+  replicas: {{ $logstash.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $logstash.name }}-pod
+  template:
+    metadata:
+      labels:
+        app: {{ $logstash.name }}-pod
+    spec:
+      containers:
+        - image: "{{ $logstash.image.repository }}:{{ $logstash.image.tag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ $logstash.image.pullPolicy }}
+          name: {{ $logstash.name }}
+          env:
+            - name: LOGSTASH_EXPOSE_API
+              value: "yes"
+            - name: LOGSTASH_API_PORT_NUMBER
+              value: "9090"
+          # 暴露容器端口
+          ports:
+            - name: coll
+              containerPort: 5044
+              protocol: TCP
+
+            - name: api
+              containerPort: 9600
+              protocol: TCP
+          volumeMounts:
+            - name: config-cof
+              mountPath: "/usr/share/logstash/pipeline/logstash.conf"
+              subPath: "logstash.conf"
+            - name: config-yaml
+              mountPath: "/usr/share/logstash/pipeline/logstash.yml"
+              subPath: "logstash.yml"
+          command: ["logstash","-f"]
+          args: 
+            - /usr/share/logstash/pipeline/logstash.conf
+      restartPolicy: Always
+      # 声明挂载
+      volumes:
+        - name: config-cof
+          configMap:
+            name: {{ $logstash.name }}-cnf-cm
+        - name: config-yaml
+          configMap:
+            name: {{ $logstash.name }}-yaml-cm
+      nodeName: master
+  
+

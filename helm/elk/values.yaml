@@ -1,0 +1,42 @@
+# Default values for pg-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: pg-service
+nfsServer: 192.168.72.100
+
+es:
+  name: es
+  replicaCount: 1
+  host: es
+  image:
+    repository: bitnami/elasticsearch
+    tag: 7.7.0
+    pullPolicy: IfNotPresent
+
+  service:
+    clusterIP: 10.98.55.160
+
+kibana:
+  name: kibana
+  replicaCount: 1
+  host: kibana
+  image:
+    repository: bitnami/kibana
+    tag: 7.7.0
+    pullPolicy: IfNotPresent
+
+  service:
+    clusterIP: 10.98.55.161
+
+logstash:
+  name: logstash
+  replicaCount: 1
+  host: logstash
+  image:
+    repository: bitnami/logstash
+    tag: 7.7.0
+    pullPolicy: IfNotPresent
+
+  service:
+    clusterIP: 10.98.55.162

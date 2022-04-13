@@ -1,0 +1,69 @@
+{{ $es := .Values.es}}
+{{ $kibana := .Values.kibana }}
+{{ $logstash := .Values.logstash}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $es.name }}-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ $es.name }}-service
+spec:
+  clusterIP: {{ $es.service.clusterIP }}
+  type: ClusterIP
+  ports:
+    - port: 9200
+      name: client-port
+      targetPort: 9200
+      protocol: TCP
+    - port: 9300
+      name: service-port
+      targetPort: 9300
+      protocol: TCP
+  selector:
+    app: {{ $es.name }}-pod
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $kibana.name }}-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ $kibana.name }}-service
+spec:
+  clusterIP: {{ $kibana.service.clusterIP }}
+  type: ClusterIP
+  ports:
+    - port: 5601
+      name: client-port
+      targetPort: 5601
+      protocol: TCP
+  selector:
+    app: {{ $kibana.name }}-pod
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $logstash.name }}-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ $logstash.name }}-service
+spec:
+  clusterIP: {{ $logstash.service.clusterIP }}
+  type: ClusterIP
+  ports:
+    - port: 5044
+      name: coll-port
+      targetPort: 5044
+      protocol: TCP
+    - port: 9600
+      name: client-port
+      targetPort: 9600
+      protocol: TCP
+  selector:
+    app: {{ $logstash.name }}-pod
+
