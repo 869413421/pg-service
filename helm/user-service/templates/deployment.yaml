@@ -57,16 +57,64 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       restartPolicy: Always
-       # 声明挂载
+      # 声明挂载
       volumes:
         - name: logs-storage
           persistentVolumeClaim:
             claimName: {{ $name }}-pvc
             readOnly: false
-
+        - name: filebeat-config
+          configMap:
+            name: {{ $name }}-filebeat-cm
         # - name: test-storage
         #   persistentVolumeClaim:
         #     claimName: user-test-pvc
         #     readOnly: false
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-filebeat
+  labels:
+  namespace: {{ $namespace }}
+spec:
+  # pod数量
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $name }}-filebeat-pod
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}-filebeat-pod
+    spec:
+      
+      containers:
+        - image: "{{ .Values.filebeatImage.repository }}:{{ .Values.filebeatImage.tag }}"
+          # 镜像拉取策略
+          imagePullPolicy: {{ .Values.filebeatImage.pullPolicy }}
+          name: {{ $name }}-filebeat
+          command: ["filebeat","-e"]
+          args: 
+            - -strict.perms=false
+          volumeMounts:
+            - name: logs-storage
+              mountPath: "/usr/share/filebeat/logs"
+              subPath: "logs"        
+            - name: filebeat-config
+              mountPath: "/usr/share/filebeat/filebeat.yml"
+              subPath: "filebeat.yml" 
+      restartPolicy: Always 
+      # 声明挂载
+      volumes:
+        - name: logs-storage
+          persistentVolumeClaim:
+            claimName: {{ $name }}-pvc
+            readOnly: false
+        - name: filebeat-config
+          configMap:
+            name: {{ $name }}-filebeat-cm
   
 

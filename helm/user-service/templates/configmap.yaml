@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.name }}-filebeat-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}-filebeat-cm
+data:
+  filebeat.yml: |
+    filebeat.inputs:
+      - type: log
+        tags: ['user-service']
+        fields:
+          log_source: user-service
+        enabled: true
+        paths:
+        # 容器中目录下的所有.log文件
+          - /usr/share/filebeat/logs/*.log
+        multiline.pattern: ^\[
+        multiline.negate: true
+        multiline.match: after
+
+    filebeat.config.modules:
+      path: ${path.config}/modules.d/*.yml
+      reload.enabled: false
+
+    setup.template.settings:
+      index.number_of_shards: 1
+
+    setup.dashboards.enabled: false
+
+    setup.kibana:
+      host: "http://10.98.55.161:5601"
+
+    output.logstash:
+      hosts: ["10.98.55.162:5044"]
+
+    processors:
+      - add_host_metadata: ~
+      - add_cloud_metadata: ~
+
+
+
+
+
+
+
+
